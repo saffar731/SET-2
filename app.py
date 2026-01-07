@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 
 app = Flask(__name__)
 
-# On Vercel, we can only write to the /tmp folder
+# Use /tmp for hosting compatibility (Vercel/Render)
 UPLOAD_FOLDER = '/tmp/project_files'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -20,9 +20,9 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    uploaded_files = request.files.getlist("file")
-    for file in uploaded_files:
-        if file.filename != '':
+    files = request.files.getlist("file")
+    for file in files:
+        if file.filename:
             file_path = os.path.join(UPLOAD_FOLDER, file.filename)
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             file.save(file_path)
@@ -31,13 +31,13 @@ def upload_file():
 @app.route('/download/<path:filename>')
 def download_item(filename):
     full_path = os.path.join(UPLOAD_FOLDER, filename)
+    if not os.path.exists(full_path): abort(404)
     
-    if not os.path.exists(full_path):
-        return abort(404)
-
-    # If it's a folder, zip it in /tmp so it can be downloaded
     if os.path.isdir(full_path):
-        zip_name = shutil.make_archive(full_path, 'zip', full_path)
-        return send_from_directory(UPLOAD_FOLDER, os.path.basename(zip_name), as_attachment=True)
+        zip_path = shutil.make_archive(full_path, 'zip', full_path)
+        return send_from_directory(UPLOAD_FOLDER, os.path.basename(zip_path), as_attachment=True)
     
     return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
