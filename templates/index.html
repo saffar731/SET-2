@@ -2,139 +2,175 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='channels4_profile.png.jpg') }}">
-    <title>Safar Edge Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safar Edge | Pro Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --bg: #050508; --accent: #6366f1; }
-        [data-theme="nature"] { --bg: #06120a; --accent: #22c55e; }
-        [data-theme="ocean"] { --bg: #020c1b; --accent: #0ea5e9; }
-        [data-theme="smile"] { --bg: #1a1002; --accent: #f59e0b; }
+        :root { --accent: #6366f1; --bg-main: #0a0a0f; }
+        [data-theme="nature"] { --accent: #22c55e; --bg-main: #060d08; }
+        [data-theme="ocean"] { --accent: #0ea5e9; --bg-main: #020817; }
+        [data-theme="fire"] { --accent: #f43f5e; --bg-main: #110404; }
+        [data-theme="smile"] { --accent: #f59e0b; --bg-main: #140e02; }
 
-        body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; font-family: sans-serif; transition: background 0.5s ease; }
+        body { background-color: var(--bg-main); color: white; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; }
         
-        /* Sidebar Fix */
-        aside { position: fixed; top: 20px; left: 20px; bottom: 20px; background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .page { display: none; margin-left: 120px; padding: 2rem; width: calc(100% - 120px); }
-        .page.active { display: block; }
-
-        /* --- ANIMATIONS --- */
-        #animation-container { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
-        
-        /* Ocean: Water Waves */
-        .wave { position: absolute; bottom: 0; width: 200%; height: 100px; background: url('https://i.imgur.com/vHqY7bM.png'); background-size: 50% 100px; animation: move_wave 10s linear infinite; opacity: 0.2; display: none; }
-        @keyframes move_wave { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
-        /* Nature: Falling Leaves */
-        .leaf { position: absolute; top: -50px; color: var(--accent); animation: fall 5s linear infinite; display: none; opacity: 0.6; }
-        @keyframes fall { 
-            0% { transform: translateY(0) rotate(0deg); left: 10%; }
-            100% { transform: translateY(110vh) rotate(360deg); left: 20%; }
+        /* Glassmorphism Sidebar */
+        aside {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            transition: width 0.4s ease;
         }
 
-        /* Logo Glow */
-        .logo-box:hover { box-shadow: 0 0 20px var(--accent); transform: scale(1.05); }
+        /* --- Real Animations --- */
+        .ani-container { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+        
+        /* Water Waves */
+        .wave { position: absolute; bottom: 0; left: 0; width: 200%; height: 150px; background: url('https://cdn.pixabay.com/photo/2017/02/07/16/47/waves-2046404_1280.png'); background-repeat: repeat-x; opacity: 0.1; animation: waveMove 15s linear infinite; display: none; }
+        @keyframes waveMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        /* Falling Leaves */
+        .leaf { position: absolute; top: -50px; width: 20px; height: 20px; background: var(--accent); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); opacity: 0.5; animation: fall 8s linear infinite; display: none; }
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Smile Image */
+        #smile-img { position: fixed; bottom: -20px; right: -20px; width: 300px; filter: grayscale(1) brightness(0.5); opacity: 0.15; display: none; }
+
+        /* Layout */
+        .page { display: none; opacity: 0; transform: translateY(20px); transition: 0.5s ease; }
+        .page.active { display: block; opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body data-theme="nature">
 
-    <div id="animation-container">
-        <div class="wave" id="ocean-wave"></div>
-        <div id="leaf-box"></div>
-        <img id="smile-img" src="https://i.imgur.com/9vYJ6M8.png" class="absolute bottom-10 right-10 w-32 opacity-20 hidden">
+    <div class="ani-container" id="ani-box">
+        <div class="wave" id="wave-1"></div>
+        <img src="https://i.imgur.com/u0Eon6H.png" id="smile-img" alt="Smile">
     </div>
 
-    <aside id="sidebar" class="w-20 sidebar-transition rounded-3xl py-8 flex flex-col items-start overflow-hidden">
-        <div class="px-4 mb-10 logo-box cursor-pointer rounded-xl transition-all">
-            <img src="{{ url_for('static', filename='channels4_profile.png.jpg') }}" class="w-12 h-12 rounded-xl object-cover">
-        </div>
-
-        <nav class="flex-1 w-full px-3 space-y-4">
-            <button onclick="showPage('tools', this)" class="flex items-center w-full p-4 rounded-2xl active bg-white/5 text-accent">
-                <i data-lucide="wrench"></i><span class="sidebar-text hidden ml-4 font-bold">Tools</span>
-            </button>
-            <button onclick="showPage('downloads', this)" class="flex items-center w-full p-4 rounded-2xl text-slate-400">
-                <i data-lucide="download"></i><span class="sidebar-text hidden ml-4 font-bold">Cloud</span>
-            </button>
-        </nav>
-
-        <div class="px-4 w-full space-y-4 border-t border-white/10 pt-6">
-            <div id="theme-menu" class="hidden flex-col gap-2">
-                <button onclick="setTheme('nature')" class="w-8 h-8 bg-green-500 rounded-full"></button>
-                <button onclick="setTheme('ocean')" class="w-8 h-8 bg-blue-500 rounded-full"></button>
-                <button onclick="setTheme('smile')" class="w-8 h-8 bg-yellow-500 rounded-full"></button>
-            </div>
-            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-                <i data-lucide="palette"></i>
-            </button>
-        </div>
-    </aside>
-
-    <main class="flex-1">
-        <section id="tools" class="page active">
-            <h1 class="text-4xl font-bold mb-8">Upload Center</h1>
-            <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-xl p-10 border-2 border-dashed border-white/10 rounded-[2rem] bg-white/5">
-                <input type="file" name="file" webkitdirectory directory multiple class="mb-6 block text-slate-400">
-                <button type="submit" class="w-full py-4 rounded-2xl font-bold" style="background: var(--accent)">Deploy Folder</button>
-            </form>
-        </section>
-
-        <section id="downloads" class="page">
-            <h1 class="text-3xl font-bold mb-6">Storage Explorer</h1>
-            <div class="space-y-3 max-w-2xl">
-                {% for item in items %}
-                <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <div class="flex items-center gap-4">
-                        <i data-lucide="{{ 'folder' if item.is_dir else 'file' }}" class="text-accent"></i>
-                        <span>{{ item.name }}</span>
-                    </div>
-                    <a href="{{ url_for('download_item', filename=item.name) }}" class="px-6 py-2 bg-white/10 rounded-xl hover:bg-white hover:text-black transition-all font-bold">Download</a>
+    <div class="flex h-full">
+        <aside id="sidebar" class="w-20 flex flex-col py-8 items-start shadow-2xl relative z-50">
+            <div class="px-5 mb-12">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_var(--accent)]">
+                    <i data-lucide="zap" class="text-white w-6 h-6"></i>
                 </div>
-                {% endfor %}
             </div>
-        </section>
-    </main>
+
+            <nav class="flex-1 w-full space-y-2 px-3">
+                <button onclick="showPage('tools', this)" class="nav-link w-full flex items-center p-3 rounded-xl transition-all text-accent bg-white/5">
+                    <i data-lucide="layout-grid"></i>
+                    <span class="sidebar-text hidden ml-4 font-semibold whitespace-nowrap">Dashboard</span>
+                </button>
+                <button onclick="showPage('downloads', this)" class="nav-link w-full flex items-center p-3 rounded-xl transition-all text-slate-400 hover:bg-white/5">
+                    <i data-lucide="folder-kanban"></i>
+                    <span class="sidebar-text hidden ml-4 font-semibold whitespace-nowrap">Projects</span>
+                </button>
+            </nav>
+
+            <div class="px-3 w-full border-t border-white/10 pt-6 space-y-4">
+                <div id="theme-grid" class="hidden grid grid-cols-2 gap-2 mb-4">
+                    <button onclick="setTheme('nature')" class="w-8 h-8 rounded-lg bg-green-500 hover:scale-110 transition"></button>
+                    <button onclick="setTheme('ocean')" class="w-8 h-8 rounded-lg bg-blue-500 hover:scale-110 transition"></button>
+                    <button onclick="setTheme('fire')" class="w-8 h-8 rounded-lg bg-red-500 hover:scale-110 transition"></button>
+                    <button onclick="setTheme('smile')" class="w-8 h-8 rounded-lg bg-amber-500 hover:scale-110 transition"></button>
+                </div>
+                <button onclick="toggleSidebar()" class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 transition mx-auto">
+                    <i data-lucide="settings-2"></i>
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-8 md:p-16">
+            <section id="tools" class="page active">
+                <h1 class="text-5xl font-black mb-2">Upload</h1>
+                <p class="text-slate-400 mb-12">Deploy your local workspace to the Safar Edge cloud.</p>
+                
+                <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-2xl bg-white/5 border border-white/10 p-12 rounded-[2.5rem] backdrop-blur-sm">
+                    <div class="border-2 border-dashed border-white/20 rounded-3xl p-12 text-center hover:border-accent transition-colors group">
+                        <input type="file" name="file" webkitdirectory directory multiple class="hidden" id="file-input">
+                        <label for="file-input" class="cursor-pointer">
+                            <i data-lucide="upload-cloud" class="w-16 h-16 mx-auto mb-4 text-slate-500 group-hover:text-accent transition"></i>
+                            <p class="text-lg font-medium">Click to select folder</p>
+                            <p class="text-sm text-slate-500 mt-2">Maximum 50MB per upload</p>
+                        </label>
+                    </div>
+                    <button type="submit" class="w-full mt-8 py-5 rounded-2xl font-bold text-lg shadow-xl hover:scale-[1.02] active:scale-95 transition-all" style="background: var(--accent); color: #000;">Start Deployment</button>
+                </form>
+            </section>
+
+            <section id="downloads" class="page">
+                <h1 class="text-5xl font-black mb-12">Cloud Explorer</h1>
+                <div class="grid md:grid-cols-2 gap-4 max-w-4xl">
+                    {% for item in items %}
+                    <div class="p-6 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-between hover:bg-white/[0.08] transition">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-accent">
+                                <i data-lucide="{{ 'folder' if item.is_dir else 'file-text' }}"></i>
+                            </div>
+                            <span class="font-bold truncate max-w-[150px]">{{ item.name }}</span>
+                        </div>
+                        <a href="{{ url_for('download_item', filename=item.name) }}" class="px-6 py-2 bg-white/10 hover:bg-white hover:text-black rounded-xl font-bold transition">Download</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+    </div>
 
     <script>
         lucide.createIcons();
-        let isOpen = false;
+        let sidebarOpen = false;
 
         function toggleSidebar() {
-            isOpen = !isOpen;
+            sidebarOpen = !sidebarOpen;
             const side = document.getElementById('sidebar');
-            side.style.width = isOpen ? '260px' : '80px';
-            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !isOpen));
-            document.getElementById('theme-menu').classList.toggle('hidden', !isOpen);
-            document.querySelectorAll('.page').forEach(p => p.style.marginLeft = isOpen ? "300px" : "120px");
+            side.style.width = sidebarOpen ? '260px' : '80px';
+            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !sidebarOpen));
+            document.getElementById('theme-grid').classList.toggle('hidden', !sidebarOpen);
         }
 
         function setTheme(theme) {
             document.body.setAttribute('data-theme', theme);
-            document.getElementById('ocean-wave').style.display = (theme === 'ocean') ? 'block' : 'none';
-            document.getElementById('smile-img').style.display = (theme === 'smile') ? 'block' : 'none';
             
-            const leafBox = document.getElementById('leaf-box');
-            leafBox.innerHTML = '';
+            // Clear animations
+            document.querySelectorAll('.leaf').forEach(l => l.remove());
+            document.getElementById('wave-1').style.display = 'none';
+            document.getElementById('smile-img').style.display = 'none';
+
             if(theme === 'nature') {
-                for(let i=0; i<10; i++) {
-                    let l = document.createElement('i');
-                    l.setAttribute('data-lucide', 'leaf');
-                    l.className = 'leaf';
-                    l.style.left = Math.random() * 100 + '%';
-                    l.style.animationDelay = Math.random() * 5 + 's';
-                    l.style.display = 'block';
-                    leafBox.appendChild(l);
+                for(let i=0; i<15; i++) {
+                    const leaf = document.createElement('div');
+                    leaf.className = 'leaf';
+                    leaf.style.left = Math.random() * 100 + 'vw';
+                    leaf.style.animationDelay = Math.random() * 5 + 's';
+                    leaf.style.display = 'block';
+                    document.getElementById('ani-box').appendChild(leaf);
                 }
-                lucide.createIcons();
+            } else if(theme === 'ocean') {
+                document.getElementById('wave-1').style.display = 'block';
+            } else if(theme === 'smile') {
+                document.getElementById('smile-img').style.display = 'block';
             }
         }
 
         function showPage(id, btn) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => {
+                l.classList.remove('text-accent', 'bg-white/5');
+                l.classList.add('text-slate-400');
+            });
+            btn.classList.add('text-accent', 'bg-white/5');
         }
+        
+        // Default theme start
+        setTheme('nature');
     </script>
 </body>
 </html>
