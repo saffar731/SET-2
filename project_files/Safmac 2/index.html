@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MixedOS 14 Pro - Ultra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+    <style>
+        body {
+            /* Modern 4K Sonoma Dark Wallpaper */
+            background: url('https://4kwallpapers.com/images/wallpapers/macos-sonoma-black-3840x2160-11655.jpg') center/cover no-repeat;
+            height: 100vh; overflow: hidden; color: white;
+        }
+        .mac-glass {
+            background: rgba(20, 20, 22, 0.72);
+            backdrop-filter: blur(45px) saturate(210%);
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
+        }
+        .window { display: none; position: absolute; border-radius: 14px; box-shadow: 0 40px 120px rgba(0,0,0,0.7); overflow: hidden; }
+        .minimized { transform: scale(0.1) translateY(1000px); opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045); }
+        .maximized { top: 28px !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 28px) !important; border-radius: 0; }
+        
+        /* Fixed Traffic Lights Logic */
+        .traffic-dot { width: 13px; height: 13px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; cursor: pointer; position: relative; z-index: 50; }
+        .traffic-dot:hover::after { content: attr(data-symbol); color: rgba(0,0,0,0.5); font-weight: bold; }
+
+        #shutdown-overlay { display: none; background: black; z-index: 999999; }
+    </style>
+</head>
+<body class="font-sans select-none antialiased">
+
+    <div id="shutdown-overlay" class="fixed inset-0 flex items-center justify-center">
+        <div class="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+    </div>
+
+    <nav class="fixed top-0 w-full h-7 mac-glass flex items-center justify-between px-5 z-[9999] text-[13px] font-medium border-b border-white/5">
+        <div class="flex gap-5">
+            <span class="text-base leading-none translate-y-[-1px] cursor-pointer" onclick="shutdown()"></span>
+            <span class="font-bold">Finder</span>
+            <span class="opacity-90 hidden md:block">File</span>
+            <span class="opacity-90 hidden md:block">Edit</span>
+            <span class="opacity-90 hidden md:block">View</span>
+            <span class="opacity-90 hidden md:block">Go</span>
+        </div>
+        <div class="flex gap-4 items-center opacity-80">
+            <i data-lucide="search" class="w-3.5 h-3.5"></i>
+            <i data-lucide="control" class="w-3.5 h-3.5"></i>
+            <span id="clock" class="tracking-tight">Jan 6 1:12 PM</span>
+        </div>
+    </nav>
+
+    <div class="absolute top-12 right-6 flex flex-col gap-8 items-center text-center w-24">
+        <div onclick="toggleWin('chess-win')" class="group cursor-pointer">
+            <div class="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl shadow-lg border border-white/10 group-hover:bg-white/20 transition-all">♟️</div>
+            <span class="text-[11px] font-medium mt-1 drop-shadow-lg block">Chess Pro</span>
+        </div>
+        <div onclick="toggleWin('ai-win')" class="group cursor-pointer">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:brightness-110 transition-all">🤖</div>
+            <span class="text-[11px] font-medium mt-1 drop-shadow-lg block">Gemini</span>
+        </div>
+        <div class="group cursor-pointer opacity-50 grayscale hover:grayscale-0 transition-all">
+            <div class="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg">🎵</div>
+            <span class="text-[11px] font-medium mt-1 drop-shadow-lg block">Music</span>
+        </div>
+    </div>
+
+    <div id="chess-win" class="window mac-glass w-[460px] h-[580px] transition-transform duration-300 ease-out" style="top: 80px; left: 100px;" onclick="focusWin('chess-win')">
+        <div class="h-12 flex items-center px-4 window-header relative bg-white/5 border-b border-white/5">
+            <div class="flex gap-2 z-[60]">
+                <div class="traffic-dot bg-[#ff5f57]" data-symbol="×" onclick="event.stopPropagation(); toggleWin('chess-win')"></div>
+                <div class="traffic-dot bg-[#febc2e]" data-symbol="−" onclick="event.stopPropagation(); minimizeWin('chess-win')"></div>
+                <div class="traffic-dot bg-[#28c840]" data-symbol="+" onclick="event.stopPropagation(); maximizeWin('chess-win')"></div>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-400 tracking-wide">Chess</div>
+        </div>
+        <div class="p-8 flex flex-col items-center gap-6 h-full bg-black/20">
+            <div id="myBoard" class="w-[340px] shadow-2xl rounded overflow-hidden"></div>
+            <div class="flex justify-between w-full px-4 items-center">
+                <div id="status" class="text-xs font-bold text-blue-400 uppercase tracking-tighter">White to move</div>
+                <button onclick="resetGame()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-[10px] font-bold transition-all uppercase tracking-widest">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ai-win" class="window mac-glass w-[420px] h-[550px]" style="top: 120px; left: 600px;" onclick="focusWin('ai-win')">
+        <div class="h-12 flex items-center px-4 window-header relative bg-white/5 border-b border-white/5">
+            <div class="flex gap-2 z-[60]">
+                <div class="traffic-dot bg-[#ff5f57]" data-symbol="×" onclick="event.stopPropagation(); toggleWin('ai-win')"></div>
+                <div class="traffic-dot bg-[#febc2e]" data-symbol="−" onclick="event.stopPropagation(); minimizeWin('ai-win')"></div>
+                <div class="traffic-dot bg-[#28c840]" data-symbol="+" onclick="event.stopPropagation(); maximizeWin('ai-win')"></div>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-400 tracking-wide">Gemini Pro</div>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <div id="chat-output" class="flex-1 overflow-y-auto p-6 space-y-5 text-sm leading-relaxed scrollbar-hide">
+                <div class="bg-white/10 p-4 rounded-2xl rounded-bl-none self-start max-w-[85%] border border-white/5">Welcome to MixedOS Pro. All systems operational.</div>
+            </div>
+            <div class="p-5 bg-black/40 border-t border-white/5">
+                <div class="relative">
+                    <input type="text" id="user-input" onkeypress="handleChat(event)" placeholder="Ask anything..." class="w-full bg-white/5 border border-white/10 rounded-2xl pl-5 pr-12 py-3 text-[13px] outline-none focus:ring-1 focus:ring-blue-500/40 transition-all">
+                    <i data-lucide="arrow-up-circle" class="w-6 h-6 absolute right-3 top-2.5 text-blue-500 cursor-pointer"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-5 left-1/2 -translate-x-1/2 mac-glass px-3 py-2.5 rounded-[24px] flex gap-4 items-center z-[10000] border border-white/20 shadow-2xl">
+        <div onclick="toggleWin('chess-win')" class="w-12 h-12 bg-neutral-800 rounded-2xl flex items-center justify-center text-2xl hover:scale-125 transition-all cursor-pointer shadow-md">♟️</div>
+        <div onclick="toggleWin('ai-win')" class="w-12 h-12 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-2xl flex items-center justify-center text-2xl hover:scale-125 transition-all cursor-pointer shadow-md">🤖</div>
+        <div class="w-[1px] h-8 bg-white/10 mx-1"></div>
+        <div onclick="shutdown()" class="w-12 h-12 bg-red-950/30 rounded-2xl flex items-center justify-center text-red-400 hover:scale-125 transition-all cursor-pointer">
+            <i data-lucide="power" class="w-6 h-6"></i>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let highestZ = 100;
+
+        // --- WINDOW LOGIC ---
+        function toggleWin(id) {
+            const win = document.getElementById(id);
+            if (win.style.display === 'flex') {
+                win.style.display = 'none';
+            } else {
+                win.style.display = 'flex';
+                win.classList.remove('minimized');
+                focusWin(id);
+            }
+        }
+
+        function focusWin(id) {
+            highestZ++;
+            document.getElementById(id).style.zIndex = highestZ;
+        }
+
+        function minimizeWin(id) {
+            document.getElementById(id).classList.add('minimized');
+            setTimeout(() => { document.getElementById(id).style.display = 'none'; }, 400);
+        }
+
+        function maximizeWin(id) {
+            document.getElementById(id).classList.toggle('maximized');
+        }
+
+        function shutdown() {
+            const overlay = document.getElementById('shutdown-overlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => { location.reload(); }, 2500);
+        }
+
+        // Fixed Draggable Logic (stopPropagation prevents drag from stealing clicks on buttons)
+        document.querySelectorAll('.window').forEach(win => {
+            const header = win.querySelector('.window-header');
+            header.onmousedown = (e) => {
+                if (win.classList.contains('maximized')) return;
+                focusWin(win.id);
+                let x = e.clientX - win.offsetLeft;
+                let y = e.clientY - win.offsetTop;
+                document.onmousemove = (e) => {
+                    win.style.left = e.clientX - x + 'px';
+                    win.style.top = e.clientY - y + 'px';
+                };
+                document.onmouseup = () => document.onmousemove = null;
+            };
+        });
+
+        // --- CHESS LOGIC ---
+        var game = new Chess();
+        var board = Chessboard('myBoard', {
+            draggable: true, position: 'start',
+            onDrop: (s, t) => {
+                let move = game.move({ from: s, to: t, promotion: 'q' });
+                if (move === null) return 'snapback';
+                document.getElementById('status').innerText = game.turn() === 'w' ? "White's Turn" : "Black's Turn";
+            }
+        });
+        function resetGame() { game.reset(); board.start(); document.getElementById('status').innerText = "White to move"; }
+
+        // --- AI LOGIC ---
+        async function handleChat(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('user-input');
+                const out = document.getElementById('chat-output');
+                if (!input.value.trim()) return;
+
+                out.innerHTML += `<div class="bg-blue-600 p-4 rounded-2xl rounded-br-none self-end max-w-[85%] shadow-lg">${input.value}</div>`;
+                const prompt = input.value;
+                input.value = '';
+                out.scrollTop = out.scrollHeight;
+
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=YOUR_API_KEY`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const data = await response.json();
+                    out.innerHTML += `<div class="bg-white/10 p-4 rounded-2xl rounded-bl-none self-start max-w-[85%] border border-white/5">${data.candidates[0].content.parts[0].text}</div>`;
+                } catch (err) {
+                    out.innerHTML += `<div class="text-red-400 text-[10px] text-center italic">API Key Missing</div>`;
+                }
+                out.scrollTop = out.scrollHeight;
+            }
+        }
+
+        function updateClock() {
+            document.getElementById('clock').innerText = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>

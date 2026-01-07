@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Core AI | Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #020617; color: white; font-family: sans-serif; overflow: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
+        .input-overlay { position: absolute; background: #3b82f6; color: white; width: 60px; border-radius: 4px; border: 2px solid white; text-align: center; font-weight: bold; font-size: 11px; z-index: 50; }
+        .sidebar-btn { width: 100%; text-align: left; padding: 12px; border-radius: 12px; margin-bottom: 8px; font-weight: 600; background: rgba(255,255,255,0.05); transition: 0.3s; }
+        .sidebar-btn:hover { background: rgba(59, 130, 246, 0.2); }
+        .active-wall { background: #3b82f6 !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+    </style>
+</head>
+<body class="h-screen flex p-4 gap-4">
+    <aside class="w-72 glass p-5 flex flex-col">
+        <h1 class="text-xl font-black italic mb-6">CIVIL<span class="text-blue-500">CORE</span></h1>
+        <div class="flex-1 overflow-y-auto pr-2">
+            <button onclick="loadWall('RW1', 1.0)" class="sidebar-btn">RW1 Profile (1.0m)</button>
+            <button onclick="loadWall('RW2', 2.0)" class="sidebar-btn">RW2 Profile (2.0m)</button>
+            <button onclick="loadWall('RW3', 3.0)" class="sidebar-btn">RW3 Profile (3.0m)</button>
+            <button onclick="loadWall('RW4', 4.0)" class="sidebar-btn">RW4 Profile (4.0m)</button>
+            <button onclick="loadWall('RW5', 5.0)" class="sidebar-btn">RW5 Profile (5.0m)</button>
+        </div>
+        <div class="mt-4 pt-4 border-t border-white/10 space-y-3">
+            <button onclick="openSafwatAI()" class="w-full bg-indigo-600 p-3 rounded-xl text-xs font-bold">SAFWAT AI</button>
+            <button onclick="openwe()" class="w-full bg-slate-800 p-3 rounded-xl text-xs font-bold italic">WORD TO EXCEL</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col gap-4">
+        <div class="glass h-16 flex items-center justify-between px-8">
+            <span id="wall-name" class="font-bold text-slate-400">SELECT MODEL</span>
+            <button onclick="calculate()" id="calc-btn" class="hidden bg-blue-600 px-6 py-2 rounded-xl font-bold text-sm">CALCULATE</button>
+        </div>
+
+        <div class="flex-1 grid grid-cols-12 gap-4">
+            <div class="col-span-8 glass relative flex items-center justify-center overflow-hidden">
+                <div id="draw-container" class="hidden relative inline-block">
+                    <img id="wall-img" src="" class="max-h-[65vh] block">
+                    <input id="in-ts" class="input-overlay" style="top: 15%; left: 56%;" value="200" title="Stem">
+                    <input id="in-h" class="input-overlay" style="top: 40%; left: 24%;" value="1.0" title="Height">
+                    <input id="in-b" class="input-overlay" style="top: 88%; left: 48%;" value="1.0" title="Base">
+                </div>
+            </div>
+            <div class="col-span-4 flex flex-col gap-4">
+                <div class="glass flex-1 p-8">
+                    <p class="text-[10px] text-slate-500 font-bold mb-8">STABILITY RESULTS</p>
+                    <div class="mb-10">
+                        <p class="text-xs text-slate-400 italic">SLIDING F.O.S</p>
+                        <h2 id="res-s" class="text-5xl font-black">--</h2>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 italic">OVERTURNING F.O.S</p>
+                        <h2 id="res-o" class="text-5xl font-black">--</h2>
+                    </div>
+                </div>
+                <div id="status" class="hidden p-6 rounded-2xl text-center font-bold text-xs uppercase"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="ai-modal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md p-8 flex-col">
+        <div class="flex justify-end"><button onclick="closeSafwatAI()" class="text-white text-2xl mb-2">&times;</button></div>
+        <iframe id="ai-frame" class="flex-1 w-full rounded-2xl border border-white/10"></iframe>
+    </div>
+
+    <script>
+        function loadWall(id, h) {
+            document.getElementById('draw-container').classList.remove('hidden');
+            document.getElementById('calc-btn').classList.remove('hidden');
+            document.getElementById('wall-name').innerText = "MODEL: " + id;
+            document.getElementById('wall-img').src = `/static/images/${id}.png`;
+            document.getElementById('in-h').value = h.toFixed(1);
+            document.getElementById('in-b').value = (h * 0.8).toFixed(1);
+
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active-wall'));
+            event.currentTarget.classList.add('active-wall');
+        }
+
+        async function calculate() {
+            const data = {
+                h: document.getElementById('in-h').value,
+                b: document.getElementById('in-b').value,
+                ts: document.getElementById('in-ts').value,
+                tf: 500, pcc: 100, mu: 0.5, phi: 30, gs: 18, q: 10
+            };
+
+            const res = await fetch('/calculate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            
+            document.getElementById('res-s').innerText = result.fos_sliding;
+            document.getElementById('res-o').innerText = result.fos_overturning;
+
+            const st = document.getElementById('status');
+            st.classList.remove('hidden');
+            st.innerText = result.is_safe ? "✓ DESIGN SAFE" : "⚠ DESIGN FAILED";
+            st.className = result.is_safe ? "p-6 rounded-2xl text-center font-bold text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" : "p-6 rounded-2xl text-center font-bold text-xs bg-rose-500/10 text-rose-400 border border-rose-500/30 animate-pulse";
+        }
+
+        function openSafwatAI() { document.getElementById('ai-modal').classList.remove('hidden'); document.getElementById('ai-modal').classList.add('flex'); document.getElementById('ai-frame').src = "/static/js/gemini.html"; }
+        function closeSafwatAI() { document.getElementById('ai-modal').classList.add('hidden'); document.getElementById('ai-frame').src = ""; }
+        function openwe() { window.open("https://saffar731.github.io/word-to-excel/wtoe.html", "_blank"); }
+    </script>
+</body>
+</html>
