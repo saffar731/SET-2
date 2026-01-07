@@ -3,174 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Safar Edge | Pro Dashboard</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='channels4_profile.png.jpg') }}">
+    <title>Safar Edge | NextGen</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        :root { --accent: #6366f1; --bg-main: #0a0a0f; }
-        [data-theme="nature"] { --accent: #22c55e; --bg-main: #060d08; }
-        [data-theme="ocean"] { --accent: #0ea5e9; --bg-main: #020817; }
-        [data-theme="fire"] { --accent: #f43f5e; --bg-main: #110404; }
-        [data-theme="smile"] { --accent: #f59e0b; --bg-main: #140e02; }
+        :root { --accent: #6366f1; --bg: #030305; }
+        [data-theme="nature"] { --accent: #10b981; --bg: #040806; }
+        [data-theme="ocean"] { --accent: #0ea5e9; --bg: #020617; }
+        [data-theme="smile"] { --accent: #f59e0b; --bg: #0f0a02; }
 
-        body { background-color: var(--bg-main); color: white; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; transition: 0.8s ease; }
         
         /* Glassmorphism Sidebar */
         aside {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            transition: width 0.4s ease;
+            position: fixed; top: 20px; left: 20px; bottom: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- Real Animations --- */
-        .ani-container { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+        /* Fixed Alignment */
+        .nav-link { display: flex; align-items: center; padding: 12px 16px; width: 100%; border-radius: 16px; transition: 0.3s; color: rgba(255,255,255,0.5); }
+        .nav-link.active, .nav-link:hover { background: rgba(255,255,255,0.05); color: var(--accent); }
+
+        /* Animation Layers */
+        #ani-layer { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+        .wave { position: absolute; bottom: 0; width: 200%; height: 120px; background: url('https://i.imgur.com/vHqY7bM.png'); opacity: 0.1; animation: moveWave 12s linear infinite; display: none; }
+        @keyframes moveWave { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         
-        /* Water Waves */
-        .wave { position: absolute; bottom: 0; left: 0; width: 200%; height: 150px; background: url('https://cdn.pixabay.com/photo/2017/02/07/16/47/waves-2046404_1280.png'); background-repeat: repeat-x; opacity: 0.1; animation: waveMove 15s linear infinite; display: none; }
-        @keyframes waveMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .leaf { position: absolute; top: -20px; font-size: 20px; color: var(--accent); opacity: 0.4; animation: leafFall 7s linear infinite; display: none; }
+        @keyframes leafFall { 100% { transform: translateY(110vh) rotate(360deg); } }
 
-        /* Falling Leaves */
-        .leaf { position: absolute; top: -50px; width: 20px; height: 20px; background: var(--accent); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); opacity: 0.5; animation: fall 8s linear infinite; display: none; }
-        @keyframes fall {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.5; }
-            90% { opacity: 0.5; }
-            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-        }
-
-        /* Smile Image */
-        #smile-img { position: fixed; bottom: -20px; right: -20px; width: 300px; filter: grayscale(1) brightness(0.5); opacity: 0.15; display: none; }
-
-        /* Layout */
-        .page { display: none; opacity: 0; transform: translateY(20px); transition: 0.5s ease; }
-        .page.active { display: block; opacity: 1; transform: translateY(0); }
+        /* LOGO GLOW */
+        .logo-box { width: 48px; height: 48px; border-radius: 14px; overflow: hidden; border: 2px solid transparent; transition: 0.4s; }
+        .logo-box:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent); transform: scale(1.1); }
     </style>
 </head>
 <body data-theme="nature">
 
-    <div class="ani-container" id="ani-box">
-        <div class="wave" id="wave-1"></div>
-        <img src="https://i.imgur.com/u0Eon6H.png" id="smile-img" alt="Smile">
+    <div id="ani-layer">
+        <div id="wave-ani" class="wave"></div>
+        <div id="leaf-box"></div>
+        <img id="smile-img" src="https://i.imgur.com/9vYJ6M8.png" class="absolute bottom-10 right-10 w-64 opacity-10 hidden">
     </div>
 
-    <div class="flex h-full">
-        <aside id="sidebar" class="w-20 flex flex-col py-8 items-start shadow-2xl relative z-50">
-            <div class="px-5 mb-12">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_var(--accent)]">
-                    <i data-lucide="zap" class="text-white w-6 h-6"></i>
-                </div>
+    <aside id="sidebar" class="w-20 rounded-[2.5rem] py-8 flex flex-col items-start overflow-hidden">
+        <div class="px-4 mb-12">
+            <div class="logo-box">
+                <img src="{{ url_for('static', filename='channels4_profile.png.jpg') }}" class="w-full h-full object-cover">
             </div>
+        </div>
 
-            <nav class="flex-1 w-full space-y-2 px-3">
-                <button onclick="showPage('tools', this)" class="nav-link w-full flex items-center p-3 rounded-xl transition-all text-accent bg-white/5">
-                    <i data-lucide="layout-grid"></i>
-                    <span class="sidebar-text hidden ml-4 font-semibold whitespace-nowrap">Dashboard</span>
-                </button>
-                <button onclick="showPage('downloads', this)" class="nav-link w-full flex items-center p-3 rounded-xl transition-all text-slate-400 hover:bg-white/5">
-                    <i data-lucide="folder-kanban"></i>
-                    <span class="sidebar-text hidden ml-4 font-semibold whitespace-nowrap">Projects</span>
-                </button>
-            </nav>
+        <nav class="flex-1 w-full px-3 space-y-3">
+            <button onclick="showPage('tools', this)" class="nav-link active">
+                <i data-lucide="grid"></i><span class="sidebar-text hidden ml-4 font-bold">Dashboard</span>
+            </button>
+            <button onclick="showPage('downloads', this)" class="nav-link">
+                <i data-lucide="archive"></i><span class="sidebar-text hidden ml-4 font-bold">Projects</span>
+            </button>
+        </nav>
 
-            <div class="px-3 w-full border-t border-white/10 pt-6 space-y-4">
-                <div id="theme-grid" class="hidden grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="setTheme('nature')" class="w-8 h-8 rounded-lg bg-green-500 hover:scale-110 transition"></button>
-                    <button onclick="setTheme('ocean')" class="w-8 h-8 rounded-lg bg-blue-500 hover:scale-110 transition"></button>
-                    <button onclick="setTheme('fire')" class="w-8 h-8 rounded-lg bg-red-500 hover:scale-110 transition"></button>
-                    <button onclick="setTheme('smile')" class="w-8 h-8 rounded-lg bg-amber-500 hover:scale-110 transition"></button>
-                </div>
-                <button onclick="toggleSidebar()" class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 transition mx-auto">
-                    <i data-lucide="settings-2"></i>
-                </button>
+        <div class="px-4 w-full space-y-4 border-t border-white/5 pt-6">
+            <div id="theme-grid" class="hidden grid grid-cols-2 gap-2 mb-2">
+                <button onclick="setTheme('nature')" class="w-8 h-8 rounded-full bg-green-500"></button>
+                <button onclick="setTheme('ocean')" class="w-8 h-8 rounded-full bg-blue-500"></button>
+                <button onclick="setTheme('smile')" class="w-8 h-8 rounded-full bg-yellow-500"></button>
             </div>
-        </aside>
+            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 transition">
+                <i data-lucide="palette"></i>
+            </button>
+        </div>
+    </aside>
 
-        <main class="flex-1 overflow-y-auto p-8 md:p-16">
-            <section id="tools" class="page active">
-                <h1 class="text-5xl font-black mb-2">Upload</h1>
-                <p class="text-slate-400 mb-12">Deploy your local workspace to the Safar Edge cloud.</p>
-                
-                <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-2xl bg-white/5 border border-white/10 p-12 rounded-[2.5rem] backdrop-blur-sm">
-                    <div class="border-2 border-dashed border-white/20 rounded-3xl p-12 text-center hover:border-accent transition-colors group">
-                        <input type="file" name="file" webkitdirectory directory multiple class="hidden" id="file-input">
-                        <label for="file-input" class="cursor-pointer">
-                            <i data-lucide="upload-cloud" class="w-16 h-16 mx-auto mb-4 text-slate-500 group-hover:text-accent transition"></i>
-                            <p class="text-lg font-medium">Click to select folder</p>
-                            <p class="text-sm text-slate-500 mt-2">Maximum 50MB per upload</p>
-                        </label>
-                    </div>
-                    <button type="submit" class="w-full mt-8 py-5 rounded-2xl font-bold text-lg shadow-xl hover:scale-[1.02] active:scale-95 transition-all" style="background: var(--accent); color: #000;">Start Deployment</button>
-                </form>
-            </section>
+    <main id="main-content" class="flex-1 p-10 md:p-20 transition-all ml-[80px]">
+        <section id="tools" class="page-content block">
+            <h1 class="text-6xl font-black tracking-tighter mb-4">Upload.</h1>
+            <p class="text-white/40 mb-12 text-lg">Securely deploy your local project folders.</p>
+            
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-xl p-1 bg-gradient-to-br from-white/10 to-transparent rounded-[3rem]">
+                <div class="bg-[#0a0a0f] rounded-[2.9rem] p-12 text-center border border-white/5">
+                    <input type="file" name="file" webkitdirectory directory multiple class="block w-full text-sm text-white/30 mb-8">
+                    <button type="submit" class="w-full py-5 rounded-2xl font-black uppercase tracking-widest text-black transition-transform active:scale-95" style="background: var(--accent);">Deploy Workspace</button>
+                </div>
+            </form>
+        </section>
 
-            <section id="downloads" class="page">
-                <h1 class="text-5xl font-black mb-12">Cloud Explorer</h1>
-                <div class="grid md:grid-cols-2 gap-4 max-w-4xl">
+        <section id="downloads" class="page-content hidden">
+            <h1 class="text-6xl font-black tracking-tighter mb-12">Projects.</h1>
+            <div class="grid gap-4 max-w-2xl">
+                {% if items %}
                     {% for item in items %}
-                    <div class="p-6 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-between hover:bg-white/[0.08] transition">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-accent">
-                                <i data-lucide="{{ 'folder' if item.is_dir else 'file-text' }}"></i>
-                            </div>
-                            <span class="font-bold truncate max-w-[150px]">{{ item.name }}</span>
+                    <div class="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:bg-white/[0.05] transition">
+                        <div class="flex items-center gap-5">
+                            <i data-lucide="{{ 'folder' if item.is_dir else 'file' }}" class="text-accent w-8 h-8"></i>
+                            <span class="text-xl font-bold">{{ item.name }}</span>
                         </div>
-                        <a href="{{ url_for('download_item', filename=item.name) }}" class="px-6 py-2 bg-white/10 hover:bg-white hover:text-black rounded-xl font-bold transition">Download</a>
+                        <a href="{{ url_for('download_item', filename=item.name) }}" class="px-8 py-3 bg-white text-black font-black rounded-2xl text-sm">Download</a>
                     </div>
                     {% endfor %}
-                </div>
-            </section>
-        </main>
-    </div>
+                {% else %}
+                    <p class="text-white/20 italic">No projects found in cloud storage.</p>
+                {% endif %}
+            </div>
+        </section>
+    </main>
 
     <script>
         lucide.createIcons();
-        let sidebarOpen = false;
+        let isOpen = false;
 
         function toggleSidebar() {
-            sidebarOpen = !sidebarOpen;
+            isOpen = !isOpen;
             const side = document.getElementById('sidebar');
-            side.style.width = sidebarOpen ? '260px' : '80px';
-            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !sidebarOpen));
-            document.getElementById('theme-grid').classList.toggle('hidden', !sidebarOpen);
+            const main = document.getElementById('main-content');
+            side.style.width = isOpen ? '260px' : '80px';
+            main.style.marginLeft = isOpen ? '280px' : '100px';
+            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !isOpen));
+            document.getElementById('theme-grid').classList.toggle('hidden', !isOpen);
         }
 
         function setTheme(theme) {
             document.body.setAttribute('data-theme', theme);
+            document.getElementById('wave-ani').style.display = theme === 'ocean' ? 'block' : 'none';
+            document.getElementById('smile-img').style.display = theme === 'smile' ? 'block' : 'none';
             
-            // Clear animations
-            document.querySelectorAll('.leaf').forEach(l => l.remove());
-            document.getElementById('wave-1').style.display = 'none';
-            document.getElementById('smile-img').style.display = 'none';
-
+            const lb = document.getElementById('leaf-box');
+            lb.innerHTML = '';
             if(theme === 'nature') {
-                for(let i=0; i<15; i++) {
-                    const leaf = document.createElement('div');
-                    leaf.className = 'leaf';
-                    leaf.style.left = Math.random() * 100 + 'vw';
-                    leaf.style.animationDelay = Math.random() * 5 + 's';
-                    leaf.style.display = 'block';
-                    document.getElementById('ani-box').appendChild(leaf);
+                for(let i=0; i<12; i++) {
+                    const l = document.createElement('div');
+                    l.className = 'leaf';
+                    l.innerHTML = '🍃';
+                    l.style.left = Math.random() * 100 + 'vw';
+                    l.style.animationDelay = Math.random() * 5 + 's';
+                    l.style.display = 'block';
+                    lb.appendChild(l);
                 }
-            } else if(theme === 'ocean') {
-                document.getElementById('wave-1').style.display = 'block';
-            } else if(theme === 'smile') {
-                document.getElementById('smile-img').style.display = 'block';
             }
         }
 
         function showPage(id, btn) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(l => {
-                l.classList.remove('text-accent', 'bg-white/5');
-                l.classList.add('text-slate-400');
-            });
-            btn.classList.add('text-accent', 'bg-white/5');
+            document.querySelectorAll('.page-content').forEach(p => p.classList.replace('block', 'hidden'));
+            document.getElementById(id).classList.replace('hidden', 'block');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            btn.classList.add('active');
         }
         
-        // Default theme start
-        setTheme('nature');
+        setTheme('nature'); // Start with nature
     </script>
 </body>
 </html>
