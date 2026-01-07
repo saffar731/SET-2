@@ -2,112 +2,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='channels4_profile.png.jpg') }}">
-    <title>Safar Edge | Pro Dashboard</title>
-    
+    <title>Safar Edge Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <style>
-        /* THEME COLOR SCHEMES */
-        :root { /* Default (Nature) */
-            --bg: #0b130e; --card: #16241b; --accent: #4ade80; --text: #ecfdf5;
-        }
-        [data-theme="ocean"] {
-            --bg: #020617; --card: #0f172a; --accent: #38bdf8; --text: #f0f9ff;
-        }
-        [data-theme="fire"] {
-            --bg: #110505; --card: #1c0a0a; --accent: #fb7185; --text: #fff1f2;
-        }
-        [data-theme="smile"] {
-            --bg: #1a1502; --card: #2e2608; --accent: #fbbf24; --text: #fffbeb;
-        }
+        :root { --bg: #050508; --accent: #6366f1; }
+        [data-theme="nature"] { --bg: #06120a; --accent: #22c55e; }
+        [data-theme="ocean"] { --bg: #020c1b; --accent: #0ea5e9; }
+        [data-theme="smile"] { --bg: #1a1002; --accent: #f59e0b; }
 
-        body { background-color: var(--bg); color: var(--text); transition: background 0.5s ease; font-family: 'Inter', sans-serif; display: flex; margin: 0; height: 100vh; }
+        body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; font-family: sans-serif; transition: background 0.5s ease; }
         
-        /* Sidebar Styling */
-        aside {
-            position: fixed; top: 15px; left: 15px; bottom: 15px;
-            background-color: var(--card); border: 1px solid rgba(255,255,255,0.05);
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .nav-btn { color: rgba(255,255,255,0.5); transition: 0.3s; }
-        .nav-btn.active, .nav-btn:hover { color: var(--accent); background: rgba(255,255,255,0.03); }
-
-        .page { display: none; margin-left: 120px; padding: 3rem; width: 100%; transition: margin-left 0.4s ease; }
+        /* Sidebar Fix */
+        aside { position: fixed; top: 20px; left: 20px; bottom: 20px; background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .page { display: none; margin-left: 120px; padding: 2rem; width: calc(100% - 120px); }
         .page.active { display: block; }
 
-        /* Theme Buttons Animation */
-        .theme-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; transition: 0.3s; cursor: pointer; }
-        .theme-dot:hover { transform: scale(1.2) rotate(15deg); filter: brightness(1.2); }
-        .theme-dot.active { border-color: white; box-shadow: 0 0 15px var(--accent); }
+        /* --- ANIMATIONS --- */
+        #animation-container { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+        
+        /* Ocean: Water Waves */
+        .wave { position: absolute; bottom: 0; width: 200%; height: 100px; background: url('https://i.imgur.com/vHqY7bM.png'); background-size: 50% 100px; animation: move_wave 10s linear infinite; opacity: 0.2; display: none; }
+        @keyframes move_wave { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-        /* Smooth Transition Clip-path Animation */
-        ::view-transition-old(root), ::view-transition-new(root) {
-            animation: none; mix-blend-mode: normal;
+        /* Nature: Falling Leaves */
+        .leaf { position: absolute; top: -50px; color: var(--accent); animation: fall 5s linear infinite; display: none; opacity: 0.6; }
+        @keyframes fall { 
+            0% { transform: translateY(0) rotate(0deg); left: 10%; }
+            100% { transform: translateY(110vh) rotate(360deg); left: 20%; }
         }
+
+        /* Logo Glow */
+        .logo-box:hover { box-shadow: 0 0 20px var(--accent); transform: scale(1.05); }
     </style>
 </head>
 <body data-theme="nature">
 
-    <aside id="sidebar" class="w-20 rounded-3xl py-8 flex flex-col shadow-2xl z-50">
-        
-        <div class="flex items-center px-6 mb-12 gap-4">
-            <div class="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-white/10 hover:shadow-[0_0_20px_var(--accent)] transition-all">
-                <img src="{{ url_for('static', filename='channels4_profile.png.jpg') }}" class="w-full h-full object-cover">
-            </div>
-            <span class="sidebar-text hidden font-bold text-lg whitespace-nowrap">Safar Edge</span>
+    <div id="animation-container">
+        <div class="wave" id="ocean-wave"></div>
+        <div id="leaf-box"></div>
+        <img id="smile-img" src="https://i.imgur.com/9vYJ6M8.png" class="absolute bottom-10 right-10 w-32 opacity-20 hidden">
+    </div>
+
+    <aside id="sidebar" class="w-20 sidebar-transition rounded-3xl py-8 flex flex-col items-start overflow-hidden">
+        <div class="px-4 mb-10 logo-box cursor-pointer rounded-xl transition-all">
+            <img src="{{ url_for('static', filename='channels4_profile.png.jpg') }}" class="w-12 h-12 rounded-xl object-cover">
         </div>
 
-        <nav class="flex-1 flex flex-col gap-2 px-3">
-            <button onclick="showPage('tools', this)" class="nav-btn w-full py-3 flex items-center px-4 rounded-2xl active">
-                <i data-lucide="wrench" class="w-6 h-6"></i>
-                <span class="sidebar-text hidden ml-4 font-medium">Tools</span>
+        <nav class="flex-1 w-full px-3 space-y-4">
+            <button onclick="showPage('tools', this)" class="flex items-center w-full p-4 rounded-2xl active bg-white/5 text-accent">
+                <i data-lucide="wrench"></i><span class="sidebar-text hidden ml-4 font-bold">Tools</span>
             </button>
-            <button onclick="showPage('downloads', this)" class="nav-btn w-full py-3 flex items-center px-4 rounded-2xl">
-                <i data-lucide="cloud-download" class="w-6 h-6"></i>
-                <span class="sidebar-text hidden ml-4 font-medium">Cloud</span>
+            <button onclick="showPage('downloads', this)" class="flex items-center w-full p-4 rounded-2xl text-slate-400">
+                <i data-lucide="download"></i><span class="sidebar-text hidden ml-4 font-bold">Cloud</span>
             </button>
         </nav>
 
-        <div class="mt-auto px-4 flex flex-col gap-4 border-t border-white/5 pt-6">
-            <div id="theme-grid" class="hidden flex-wrap gap-3 mb-4">
-                <div onclick="setTheme('nature')" class="theme-dot bg-green-500" title="Nature"></div>
-                <div onclick="setTheme('ocean')" class="theme-dot bg-blue-500" title="Ocean"></div>
-                <div onclick="setTheme('fire')" class="theme-dot bg-rose-500" title="Fire"></div>
-                <div onclick="setTheme('smile')" class="theme-dot bg-amber-400" title="Smile"></div>
+        <div class="px-4 w-full space-y-4 border-t border-white/10 pt-6">
+            <div id="theme-menu" class="hidden flex-col gap-2">
+                <button onclick="setTheme('nature')" class="w-8 h-8 bg-green-500 rounded-full"></button>
+                <button onclick="setTheme('ocean')" class="w-8 h-8 bg-blue-500 rounded-full"></button>
+                <button onclick="setTheme('smile')" class="w-8 h-8 bg-yellow-500 rounded-full"></button>
             </div>
-            
-            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all mx-auto">
-                <i data-lucide="palette" id="main-icon" class="text-white"></i>
+            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                <i data-lucide="palette"></i>
             </button>
         </div>
     </aside>
 
     <main class="flex-1">
         <section id="tools" class="page active">
-            <h1 class="text-5xl font-black mb-4 tracking-tighter">Tools.</h1>
-            <p class="opacity-50 mb-10">Upload your workspace to the cloud.</p>
-            <div class="max-w-xl p-12 rounded-[3rem] border-2 border-dashed border-white/10 bg-white/[0.02] hover:border-accent transition-colors">
-                <input type="file" webkitdirectory directory multiple class="block w-full text-sm text-slate-500 mb-6">
-                <button class="w-full py-4 rounded-2xl font-bold transition-all hover:scale-[1.02]" style="background: var(--accent); color: var(--bg);">Deploy Folder</button>
-            </div>
+            <h1 class="text-4xl font-bold mb-8">Upload Center</h1>
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-xl p-10 border-2 border-dashed border-white/10 rounded-[2rem] bg-white/5">
+                <input type="file" name="file" webkitdirectory directory multiple class="mb-6 block text-slate-400">
+                <button type="submit" class="w-full py-4 rounded-2xl font-bold" style="background: var(--accent)">Deploy Folder</button>
+            </form>
         </section>
 
         <section id="downloads" class="page">
-            <h1 class="text-5xl font-black mb-8 tracking-tighter">Storage.</h1>
-            <div class="grid gap-4 max-w-2xl">
-                {% for i in range(3) %}
-                <div class="p-6 rounded-3xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
+            <h1 class="text-3xl font-bold mb-6">Storage Explorer</h1>
+            <div class="space-y-3 max-w-2xl">
+                {% for item in items %}
+                <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
-                            <i data-lucide="folder" class="text-accent"></i>
-                        </div>
-                        <span class="font-bold">Project_Beta_0{{i+1}}</span>
+                        <i data-lucide="{{ 'folder' if item.is_dir else 'file' }}" class="text-accent"></i>
+                        <span>{{ item.name }}</span>
                     </div>
-                    <button class="px-6 py-2 bg-white/5 rounded-xl text-sm font-bold hover:bg-white/10 transition-all">Download</button>
+                    <a href="{{ url_for('download_item', filename=item.name) }}" class="px-6 py-2 bg-white/10 rounded-xl hover:bg-white hover:text-black transition-all font-bold">Download</a>
                 </div>
                 {% endfor %}
             </div>
@@ -121,43 +104,36 @@
         function toggleSidebar() {
             isOpen = !isOpen;
             const side = document.getElementById('sidebar');
-            const texts = document.querySelectorAll('.sidebar-text');
-            const themeGrid = document.getElementById('theme-grid');
-            
             side.style.width = isOpen ? '260px' : '80px';
-            texts.forEach(t => t.classList.toggle('hidden', !isOpen));
-            themeGrid.classList.toggle('hidden', !isOpen);
-            themeGrid.classList.toggle('flex', isOpen);
-
-            document.querySelectorAll('.page').forEach(p => {
-                p.style.marginLeft = isOpen ? "300px" : "120px";
-            });
+            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !isOpen));
+            document.getElementById('theme-menu').classList.toggle('hidden', !isOpen);
+            document.querySelectorAll('.page').forEach(p => p.style.marginLeft = isOpen ? "300px" : "120px");
         }
 
-        function setTheme(themeName) {
-            // Check if browser supports View Transitions API
-            if (!document.startViewTransition) {
-                document.body.setAttribute('data-theme', themeName);
-                return;
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            document.getElementById('ocean-wave').style.display = (theme === 'ocean') ? 'block' : 'none';
+            document.getElementById('smile-img').style.display = (theme === 'smile') ? 'block' : 'none';
+            
+            const leafBox = document.getElementById('leaf-box');
+            leafBox.innerHTML = '';
+            if(theme === 'nature') {
+                for(let i=0; i<10; i++) {
+                    let l = document.createElement('i');
+                    l.setAttribute('data-lucide', 'leaf');
+                    l.className = 'leaf';
+                    l.style.left = Math.random() * 100 + '%';
+                    l.style.animationDelay = Math.random() * 5 + 's';
+                    l.style.display = 'block';
+                    leafBox.appendChild(l);
+                }
+                lucide.createIcons();
             }
-
-            // AWESOME TRANSITION ANIMATION
-            document.startViewTransition(() => {
-                document.body.setAttribute('data-theme', themeName);
-                
-                // Update dots UI
-                document.querySelectorAll('.theme-dot').forEach(dot => {
-                    dot.classList.remove('active');
-                    if(dot.title.toLowerCase() === themeName) dot.classList.add('active');
-                });
-            });
         }
 
         function showPage(id, btn) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
         }
     </script>
 </body>
