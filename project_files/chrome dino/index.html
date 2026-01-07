@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dino Physics Clone</title>
+    <style>
+        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #363636; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+        #game { width: 800px; height: 200px; border-bottom: 2px solid #535353; background-color: rgb(53, 52, 52); position: relative; overflow: hidden; }
+        
+        #dino { width: 50px; height: 50px; position: absolute; bottom: 0; left: 50px; background-image: url('vector-illustration-classic-pixel-dinosaur-600nw-2587592815.png'); background-size: contain; background-repeat: no-repeat; }
+        #cactus { width: 40px; height: 50px; position: absolute; bottom: 0; background-image: url('download.png'); background-size: contain; background-repeat: no-repeat; }
+        #bird { width: 40px; height: 30px; position: absolute; bottom: 80px; background-image: url('download-2.png'); background-size: contain; background-repeat: no-repeat; }
+        
+        #score { position: absolute; top: 10px; right: 20px; font-size: 20px; color: #535353; }
+        .message { position: absolute; width: 100%; text-align: center; top: 40%; font-weight: bold; color: #535353; font-size: 24px; }
+    </style>
+</head>
+<body>
+
+    <div id="game">
+        <div id="score">Score: 0</div>
+        <div id="dino"></div>
+        <div id="cactus"></div>
+        <div id="bird"></div>
+        <div id="message" class="message">PRESS SPACE TO START</div>
+    </div>
+
+    <script>
+        const dino = document.getElementById("dino");
+        const cactus = document.getElementById("cactus");
+        const bird = document.getElementById("bird");
+        const scoreElement = document.getElementById("score");
+        const message = document.getElementById("message");
+
+        // Physics Variables
+        let gravity = 0.6;
+        let jumpStrength = -12;
+        let dinoY = 0;
+        let dinoVelocityY = 0;
+        let isJumping = false;
+        
+        // Game State
+        let score = 0;
+        let gameActive = false;
+        let cactusX = 800;
+        let birdX = 1200; // Bird starts further back
+        let gameSpeed = 6;
+
+        function handleInput(e) {
+            if (e.code === "Space" || e.type === "mousedown") {
+                if (!gameActive) {
+                    resetGame();
+                } else if (!isJumping) {
+                    dinoVelocityY = jumpStrength;
+                    isJumping = true;
+                }
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            cactusX = 800;
+            birdX = 1300;
+            gameSpeed = 6;
+            dinoY = 0;
+            dinoVelocityY = 0;
+            gameActive = true;
+            message.style.display = "none";
+            requestAnimationFrame(update);
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            // 1. Dino Physics (Gravity)
+            dinoVelocityY += gravity;
+            dinoY -= dinoVelocityY;
+
+            if (dinoY <= 0) { // Land on ground
+                dinoY = 0;
+                dinoVelocityY = 0;
+                isJumping = false;
+            }
+            dino.style.bottom = dinoY + "px";
+
+            // 2. Obstacle Movement
+            cactusX -= gameSpeed;
+            birdX -= gameSpeed * 1.2; // Bird moves slightly faster
+
+            if (cactusX < -50) cactusX = 800 + Math.random() * 300;
+            if (birdX < -50) birdX = 1000 + Math.random() * 600;
+
+            cactus.style.left = cactusX + "px";
+            bird.style.left = birdX + "px";
+
+            // 3. Collision Detection (Bounding Box)
+            const dinoRect = dino.getBoundingClientRect();
+            const cactusRect = cactus.getBoundingClientRect();
+            const birdRect = bird.getBoundingClientRect();
+
+            if (isColliding(dinoRect, cactusRect) || isColliding(dinoRect, birdRect)) {
+                gameOver();
+                return;
+            }
+
+            // 4. Score & Difficulty
+            score++;
+            gameSpeed += 0.001; // Gradually speed up
+            scoreElement.innerHTML = `Score: ${Math.floor(score / 5)}`;
+
+            requestAnimationFrame(update);
+        }
+
+        function isColliding(rect1, rect2) {
+            // Shrink hitbox slightly for fairness
+            return !(rect1.right - 10 < rect2.left + 5 || 
+                     rect1.left + 10 > rect2.right - 5 || 
+                     rect1.bottom - 5 < rect2.top + 5 || 
+                     rect1.top + 5 > rect2.bottom - 5);
+        }
+
+        function gameOver() {
+            gameActive = false;
+            message.style.display = "block";
+            message.innerHTML = `GAME OVER<br><span style="font-size:14px">Final Score: ${Math.floor(score/5)}<br>Press Space to Restart</span>`;
+        }
+
+        window.addEventListener("keydown", handleInput);
+        window.addEventListener("mousedown", handleInput);
+    </script>
+</body>
+</html>
