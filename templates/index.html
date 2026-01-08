@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Safar Edge | Pro</title>
+    <link rel="icon" type="image/jpeg" href="/static/channels4_profile.png.jpg">
+    <title>Safar Edge | Pro Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -12,7 +13,7 @@
         [data-theme="ocean"] { --accent: #0ea5e9; --bg: #020617; }
         [data-theme="smile"] { --accent: #f59e0b; --bg: #0f0a02; }
 
-        body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; transition: background 0.8s ease; }
+        body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; transition: 0.8s ease; }
         
         aside {
             position: fixed; top: 20px; left: 20px; bottom: 20px;
@@ -21,21 +22,33 @@
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .nav-link { display: flex; align-items: center; padding: 12px 16px; border-radius: 16px; transition: 0.3s; color: rgba(255,255,255,0.4); }
+        .nav-link { display: flex; align-items: center; padding: 14px 18px; border-radius: 18px; transition: 0.3s; color: rgba(255,255,255,0.4); width: 100%; text-align: left; }
         .nav-link.active { background: rgba(255,255,255,0.05); color: var(--accent); }
 
-        /* Animation Layers */
-        #ani-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-        .ocean-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 15%; overflow: hidden; display: none; }
-        .wave { background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg') repeat-x; position: absolute; top: -55px; width: 6400px; height: 198px; animation: wave 7s linear infinite; opacity: 0.1; }
-        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-1600px); } }
+        /* Real Logo Glow Effect */
+        .logo-container {
+            width: 52px; height: 52px; border-radius: 16px; overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1); transition: 0.5s;
+            box-shadow: 0 0 0 var(--accent);
+        }
+        .logo-container:hover {
+            transform: scale(1.15) rotate(5deg);
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent);
+        }
 
+        /* Animations */
+        #ani-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+        .ocean-container { position: absolute; bottom: 0; width: 100%; height: 20%; overflow: hidden; display: none; }
+        .wave { background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg') repeat-x; position: absolute; top: -55px; width: 6400px; height: 198px; animation: wave 7s linear infinite; opacity: 0.15; }
+        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-1600px); } }
+        
         .leaf { position: absolute; top: -50px; font-size: 24px; animation: leafFall 8s linear infinite; display: none; }
         @keyframes leafFall { 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
 
         #progress-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(15px); z-index: 1000;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(20px); z-index: 1000;
             display: none; align-items: center; justify-content: center;
         }
     </style>
@@ -44,8 +57,8 @@
 
     <div id="progress-modal">
         <div class="w-full max-w-md p-10 bg-white/5 border border-white/10 rounded-[3rem] text-center">
-            <i data-lucide="package-open" class="w-16 h-16 mx-auto mb-6 text-accent animate-pulse"></i>
-            <h2 class="text-2xl font-bold mb-2">Compressing Folder...</h2>
+            <i data-lucide="loader" class="w-16 h-16 mx-auto mb-6 text-accent animate-spin"></i>
+            <h2 class="text-2xl font-bold mb-2">Safar Edge is Zipping...</h2>
             <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden mt-6">
                 <div id="bar" class="h-full bg-accent transition-all duration-300" style="width: 0%"></div>
             </div>
@@ -59,50 +72,61 @@
         <img id="smile-img" src="https://www.svgrepo.com/show/419918/smile-emoji-emoticon.svg" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 opacity-5 hidden">
     </div>
 
-    <aside id="sidebar" class="w-20 rounded-[2.5rem] py-8 flex flex-col items-start overflow-hidden">
-        <div class="px-4 mb-12">
-            <div class="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center border border-accent/50 shadow-[0_0_20px_var(--accent)]">
-                <i data-lucide="zap" class="text-accent"></i>
+    <aside id="sidebar" class="w-20 rounded-[2.5rem] py-10 flex flex-col items-start overflow-hidden shadow-2xl">
+        <div class="px-4 mb-14">
+            <div class="logo-container">
+                <img src="/static/channels4_profile.png.jpg" 
+                     onerror="this.src='https://ui-avatars.com/api/?name=Safar+Edge&background=10b981&color=fff'"
+                     class="w-full h-full object-cover">
             </div>
         </div>
 
-        <nav class="flex-1 w-full px-3 space-y-3">
-            <button onclick="showPage('tools', this)" class="nav-link active"><i data-lucide="upload-cloud"></i><span class="sidebar-text hidden ml-4 font-bold">Upload</span></button>
-            <button onclick="showPage('downloads', this)" class="nav-link"><i data-lucide="folder-kanban"></i><span class="sidebar-text hidden ml-4 font-bold">Projects</span></button>
+        <nav class="flex-1 w-full px-3 space-y-4">
+            <button onclick="showPage('tools', this)" class="nav-link active">
+                <i data-lucide="plus-square"></i><span class="sidebar-text hidden ml-4 font-bold">New Upload</span>
+            </button>
+            <button onclick="showPage('downloads', this)" class="nav-link">
+                <i data-lucide="folder-search"></i><span class="sidebar-text hidden ml-4 font-bold">Project Files</span>
+            </button>
         </nav>
 
-        <div class="px-4 w-full border-t border-white/5 pt-6 space-y-4">
-            <div id="theme-grid" class="hidden grid grid-cols-2 gap-3">
-                <div onclick="setTheme('nature')" class="w-8 h-8 rounded-full bg-emerald-500 cursor-pointer hover:scale-110 transition"></div>
-                <div onclick="setTheme('ocean')" class="w-8 h-8 rounded-full bg-blue-500 cursor-pointer hover:scale-110 transition"></div>
-                <div onclick="setTheme('smile')" class="w-8 h-8 rounded-full bg-amber-500 cursor-pointer hover:scale-110 transition"></div>
+        <div class="px-4 w-full border-t border-white/5 pt-8 space-y-6">
+            <div id="theme-grid" class="hidden grid grid-cols-2 gap-4">
+                <div onclick="setTheme('nature')" class="w-10 h-10 rounded-2xl bg-emerald-500 cursor-pointer shadow-lg"></div>
+                <div onclick="setTheme('ocean')" class="w-10 h-10 rounded-2xl bg-blue-500 cursor-pointer shadow-lg"></div>
+                <div onclick="setTheme('smile')" class="w-10 h-10 rounded-2xl bg-amber-500 cursor-pointer shadow-lg"></div>
             </div>
-            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 mx-auto transition"><i data-lucide="settings"></i></button>
+            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 mx-auto transition shadow-inner">
+                <i data-lucide="palette"></i>
+            </button>
         </div>
     </aside>
 
-    <main id="main-content" class="flex-1 p-10 md:p-20 transition-all ml-[80px]">
+    <main id="main-content" class="flex-1 p-10 md:p-24 transition-all ml-[80px]">
         <section id="tools" class="page-content block">
-            <h1 class="text-7xl font-black tracking-tighter mb-4">Safar Edge.</h1>
-            <p class="text-white/30 text-xl mb-12">Drop your project folders here to store them.</p>
-            <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-xl p-1 bg-gradient-to-br from-white/10 to-transparent rounded-[3rem]">
-                <div class="bg-[#0a0a0f] rounded-[2.9rem] p-12 text-center border border-white/5">
-                    <input type="file" name="file" webkitdirectory directory multiple class="block w-full text-sm text-white/20 mb-10">
-                    <button type="submit" class="w-full py-5 rounded-2xl font-black uppercase text-black" style="background: var(--accent);">Deploy Workspace</button>
+            <h1 class="text-8xl font-black tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/20">Safar Edge.</h1>
+            <p class="text-white/40 text-2xl mb-16">The ultimate workspace for your tutorials.</p>
+            
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-xl p-1 bg-gradient-to-br from-white/20 to-transparent rounded-[3.5rem] shadow-2xl">
+                <div class="bg-[#050508] rounded-[3.4rem] p-14 text-center border border-white/5">
+                    <input type="file" name="file" webkitdirectory directory multiple class="block w-full text-sm text-white/30 mb-12 file:bg-white/5 file:border-0 file:text-white file:rounded-full file:px-4 file:py-2">
+                    <button type="submit" class="w-full py-6 rounded-3xl font-black uppercase tracking-widest text-black hover:scale-105 transition-all shadow-[0_20px_50px_rgba(0,0,0,0.5)]" style="background: var(--accent);">Deploy Workspace</button>
                 </div>
             </form>
         </section>
 
         <section id="downloads" class="page-content hidden">
-            <h1 class="text-7xl font-black tracking-tighter mb-12">Cloud.</h1>
-            <div class="grid gap-4 max-w-2xl">
+            <h1 class="text-7xl font-black tracking-tighter mb-16">Cloud Storage.</h1>
+            <div class="grid gap-6 max-w-3xl">
                 {% for item in items %}
-                <div class="flex items-center justify-between p-6 bg-white/[0.03] border border-white/10 rounded-[3rem] backdrop-blur-xl">
-                    <div class="flex items-center gap-5">
-                        <i data-lucide="{{ 'folder' if item.is_dir else 'file-text' }}" class="text-accent w-8 h-8"></i>
-                        <span class="text-xl font-bold tracking-tight">{{ item.name }}</span>
+                <div class="flex items-center justify-between p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] backdrop-blur-3xl hover:bg-white/[0.05] transition-all group">
+                    <div class="flex items-center gap-6">
+                        <div class="p-4 rounded-2xl bg-white/5 text-accent group-hover:scale-110 transition">
+                            <i data-lucide="{{ 'folder' if item.is_dir else 'file-code' }}" class="w-8 h-8"></i>
+                        </div>
+                        <span class="text-2xl font-bold tracking-tight">{{ item.name }}</span>
                     </div>
-                    <button onclick="handleDownload('{{ item.name }}', {{ 'true' if item.is_dir else 'false' }})" class="px-8 py-3 bg-white text-black font-black rounded-2xl hover:scale-105 transition active:scale-95">Get</button>
+                    <button onclick="handleDownload('{{ item.name }}', {{ 'true' if item.is_dir else 'false' }})" class="px-10 py-4 bg-white text-black font-black rounded-2xl hover:bg-accent hover:text-white transition-all shadow-xl">Get</button>
                 </div>
                 {% endfor %}
             </div>
@@ -115,7 +139,8 @@
 
         function toggleSidebar() {
             isOpen = !isOpen;
-            document.getElementById('sidebar').style.width = isOpen ? '280px' : '80px';
+            document.getElementById('sidebar').style.width = isOpen ? '300px' : '90px';
+            document.getElementById('main-content').style.marginLeft = isOpen ? '320px' : '100px';
             document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !isOpen));
             document.getElementById('theme-grid').classList.toggle('hidden', !isOpen);
         }
@@ -128,7 +153,7 @@
                 const percent = document.getElementById('percent');
                 modal.style.display = 'flex';
                 let p = 0;
-                let interval = setInterval(() => {
+                let int = setInterval(() => {
                     p += Math.random() * 15;
                     if (p > 98) p = 98;
                     bar.style.width = p + '%';
@@ -138,10 +163,10 @@
                 window.location.href = `/download/${safeName}`;
                 
                 setTimeout(() => {
-                    clearInterval(interval);
+                    clearInterval(int);
                     bar.style.width = '100%'; percent.innerText = '100%';
-                    setTimeout(() => { modal.style.display = 'none'; bar.style.width = '0%'; }, 1000);
-                }, 4000);
+                    setTimeout(() => { modal.style.display = 'none'; bar.style.width = '0%'; }, 1500);
+                }, 4500);
             } else {
                 window.location.href = `/download/${safeName}`;
             }
