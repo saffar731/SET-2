@@ -9,18 +9,19 @@ UPLOAD_FOLDER = '/tmp/project_files'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Helper to calculate storage used
-def get_storage_info():
+def get_storage_stats():
     total_size = 0
     if os.path.exists(UPLOAD_FOLDER):
-        for dirpath, dirnames, filenames in os.walk(UPLOAD_FOLDER):
+        for dirpath, _, filenames in os.walk(UPLOAD_FOLDER):
             for f in filenames:
                 fp = os.path.join(dirpath, f)
-                total_size += os.path.getsize(fp)
+                if os.path.exists(fp):
+                    total_size += os.path.getsize(fp)
     
-    # Convert to GB for the indicator (100,000 GB limit)
-    size_gb = total_size / (1024**3)
-    return round(size_gb, 4)
+    used_gb = total_size / (1024**3)
+    limit_gb = 100000
+    percent = (used_gb / limit_gb) * 100
+    return round(used_gb, 4), round(percent, 2)
 
 @app.route('/')
 def index():
@@ -31,8 +32,8 @@ def index():
                 path = os.path.join(UPLOAD_FOLDER, name)
                 items.append({'name': name, 'is_dir': os.path.isdir(path)})
     
-    used_gb = get_storage_info()
-    return render_template('index.html', items=items, used_gb=used_gb)
+    used_gb, percent = get_storage_stats()
+    return render_template('index.html', items=items, used_gb=used_gb, percent=percent)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -48,7 +49,6 @@ def upload_file():
 def delete_item(filename):
     decoded_name = urllib.parse.unquote(filename)
     full_path = os.path.join(UPLOAD_FOLDER, decoded_name)
-    
     if os.path.exists(full_path):
         if os.path.isdir(full_path):
             shutil.rmtree(full_path)
