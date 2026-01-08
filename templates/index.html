@@ -3,83 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRC | Unified Storage</title>
+    <title>BRC | Master System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
-        :root { --accent: #ff5500; --bg: #080808; }
-        body { background-color: var(--bg); color: white; margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        :root { --accent: #ff5500; --bg: #050505; }
+        [data-theme="nature"] { --accent: #10b981; --bg: #040806; }
+        [data-theme="ocean"] { --accent: #0ea5e9; --bg: #020617; }
+        [data-theme="smile"] { --accent: #f59e0b; --bg: #0f0a02; }
+
+        body { background-color: var(--bg); color: white; margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; transition: 0.5s; }
 
         aside {
             width: 80px; height: calc(100vh - 40px); margin: 20px;
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem;
-            display: flex; flex-direction: column; align-items: center; padding: 30px 0; flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center; padding: 30px 0;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0;
         }
+        aside.expanded { width: 260px; align-items: flex-start; padding: 30px 20px; }
 
-        .nav-btn { padding: 15px; border-radius: 15px; color: rgba(255,255,255,0.2); transition: 0.3s; }
-        .nav-btn.active { color: var(--accent); background: rgba(255,85,0,0.1); }
+        .nav-link { 
+            display: flex; align-items: center; gap: 15px; width: 100%; 
+            padding: 15px; border-radius: 18px; color: rgba(255,255,255,0.2); transition: 0.3s; 
+        }
+        .nav-link.active { color: var(--accent); background: rgba(255,255,255,0.05); }
+        .nav-text { opacity: 0; white-space: nowrap; transition: 0.3s; font-weight: bold; }
+        aside.expanded .nav-text { opacity: 1; }
 
         .flame {
-            width: 20px; height: 20px; background: var(--accent); border-radius: 50% 0 50% 50%;
+            width: 25px; height: 25px; background: var(--accent); border-radius: 50% 0 50% 50%;
             transform: rotate(-45deg); filter: blur(1px); animation: burn 0.5s infinite alternate;
-            box-shadow: 0 0 15px var(--accent); margin-top: auto;
+            box-shadow: 0 0 15px var(--accent); margin: 20px auto;
         }
-        @keyframes burn { from { transform: rotate(-45deg) scale(1); } to { transform: rotate(-45deg) scale(1.2); } }
+        @keyframes burn { from { transform: scale(1); } to { transform: scale(1.2); } }
 
         main { flex-grow: 1; padding: 60px; overflow-y: auto; }
-        .folder-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 2rem; padding: 25px; transition: 0.3s; }
-        .folder-card:hover { border-color: var(--accent); background: rgba(255,255,255,0.04); }
+        .theme-dot { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
     </style>
 </head>
-<body>
+<body data-theme="nature">
 
-    <aside>
-        <div class="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center font-black text-black mb-10">BRC</div>
+    <aside id="sidebar">
+        <div class="flex items-center gap-4 mb-10 ml-2">
+            <div class="w-10 h-10 rounded-lg bg-white text-black flex items-center justify-center font-black">B</div>
+            <span class="nav-text text-xl tracking-tighter">BRC_SYSTEM</span>
+        </div>
         
-        <nav class="flex flex-col gap-6">
-            <button onclick="showPage('up-page', this)" class="nav-btn active"><i data-lucide="upload"></i></button>
-            <button onclick="showPage('list-page', this)" class="nav-btn"><i data-lucide="folder"></i></button>
+        <nav class="flex-1 w-full space-y-2">
+            <button onclick="showPage('up-p', this)" class="nav-link active">
+                <i data-lucide="upload"></i> <span class="nav-text">Injection</span>
+            </button>
+            <button onclick="showPage('list-p', this)" class="nav-link">
+                <i data-lucide="database"></i> <span class="nav-text">Archives</span>
+            </button>
         </nav>
+
+        <div class="flex flex-col gap-4 mb-8 items-center">
+            <div onclick="setTheme('nature')" class="theme-dot bg-emerald-500"></div>
+            <div onclick="setTheme('ocean')" class="theme-dot bg-blue-500"></div>
+            <div onclick="setTheme('smile')" class="theme-dot bg-amber-500"></div>
+        </div>
+
+        <button onclick="toggleSidebar()" class="nav-link">
+            <i data-lucide="menu"></i> <span class="nav-text">Toggle Menu</span>
+        </button>
 
         <div class="flame"></div>
     </aside>
 
     <main>
-        <header class="mb-12">
-            <h1 class="text-6xl font-black italic">BRC<span class="text-orange-600">.</span></h1>
-            <p class="text-white/20 text-[10px] font-bold tracking-[0.3em] mt-2 uppercase">Load: {{ used_gb }} GB / 100K GB</p>
+        <header class="mb-16">
+            <h1 class="text-7xl font-black italic">BRC<span class="text-orange-600">.</span></h1>
+            <p class="text-white/20 text-[10px] font-bold tracking-[0.4em] uppercase mt-2">100K GB Eternal Data Stream</p>
         </header>
 
-        <div id="up-page" class="page-content">
-            <div class="max-w-xl bg-white/[0.02] p-12 rounded-[3rem] border border-white/5">
-                <h2 class="text-xl font-bold mb-6">INJECT FOLDER</h2>
+        <div id="up-p" class="page-content">
+            <div class="max-w-xl bg-white/[0.02] border border-white/5 p-12 rounded-[3rem] backdrop-blur-xl">
                 <form id="upload-form">
-                    <input type="file" id="file-input" webkitdirectory directory multiple class="block w-full text-sm text-white/30 mb-8">
-                    <button type="submit" class="w-full py-5 bg-orange-600 text-black font-black rounded-2xl uppercase hover:bg-white transition">Start Upload</button>
+                    <input type="file" id="file-input" webkitdirectory directory multiple class="block w-full text-sm text-white/20 mb-10">
+                    <button type="submit" class="w-full py-5 rounded-2xl bg-white text-black font-black uppercase hover:bg-orange-500 transition">Begin Sync</button>
                 </form>
-                <div id="prog-box" class="hidden mt-8">
-                    <div class="flex justify-between text-[10px] mb-2 font-bold"><span class="text-orange-500">UPLOADING...</span><span id="pct">0%</span></div>
-                    <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div id="bar" class="h-full bg-orange-500" style="width: 0%"></div></div>
+                <div id="pb" class="hidden mt-8">
+                    <div class="flex justify-between text-[10px] font-bold mb-2"><span>UPLOADING</span><span id="pct">0%</span></div>
+                    <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div id="bar" class="h-full bg-white" style="width: 0%"></div></div>
                 </div>
             </div>
         </div>
 
-        <div id="list-page" class="page-content hidden">
-            <div class="grid gap-6 max-w-4xl">
-                {% for folder_name, contents in folders.items() %}
-                <div class="folder-card flex items-center justify-between">
+        <div id="list-p" class="page-content hidden">
+            <div class="grid gap-4 max-w-4xl">
+                {% for folder, files in folders.items() %}
+                <div class="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-[2rem] hover:border-white/20 transition">
                     <div class="flex items-center gap-5">
-                        <div class="p-4 bg-orange-500/10 rounded-2xl text-orange-500"><i data-lucide="folder-closed"></i></div>
-                        <div>
-                            <h3 class="font-bold text-lg">{{ folder_name }}</h3>
-                            <p class="text-xs text-white/20">{{ contents|length }} Files Inside</p>
-                        </div>
+                        <i data-lucide="folder" class="text-white/20"></i>
+                        <div><h3 class="font-bold">{{ folder }}</h3><p class="text-[10px] opacity-30 uppercase">{{ files|length }} Files</p></div>
                     </div>
-                    <div class="flex gap-3">
-                        <button onclick="alert('Open folder to see files (Feature coming soon)')" class="p-3 bg-white/5 rounded-xl hover:bg-white/10"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                        <a href="/delete_folder/{{ folder_name }}" class="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+                    <div class="flex gap-2">
+                        <a href="/download_folder/{{ folder }}" class="p-3 bg-white text-black rounded-xl"><i data-lucide="download"></i></a>
+                        <a href="/delete_folder/{{ folder }}" class="p-3 bg-red-500/10 text-red-500 rounded-xl"><i data-lucide="trash-2"></i></a>
                     </div>
                 </div>
                 {% endfor %}
@@ -89,11 +112,12 @@
 
     <script>
         lucide.createIcons();
-
-        function showPage(pageId, btn) {
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('expanded'); }
+        function setTheme(t) { document.body.setAttribute('data-theme', t); }
+        function showPage(id, btn) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-            document.getElementById(pageId).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.remove('hidden');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             btn.classList.add('active');
         }
 
@@ -101,23 +125,16 @@
         form.onsubmit = async (e) => {
             e.preventDefault();
             const files = document.getElementById('file-input').files;
-            if (!files.length) return;
-
             const formData = new FormData();
             for (const file of files) formData.append('file', file, file.webkitRelativePath);
-
             const xhr = new XMLHttpRequest();
-            document.getElementById('prog-box').classList.remove('hidden');
-
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) {
-                    const p = Math.round((e.loaded / e.total) * 100);
-                    document.getElementById('bar').style.width = p + '%';
-                    document.getElementById('pct').innerText = p + '%';
-                }
+            document.getElementById('pb').classList.remove('hidden');
+            xhr.upload.onprogress = (ev) => {
+                const p = Math.round((ev.loaded / ev.total) * 100);
+                document.getElementById('bar').style.width = p + '%';
+                document.getElementById('pct').innerText = p + '%';
             };
-
-            xhr.onload = () => { if(xhr.status === 200) window.location.reload(); };
+            xhr.onload = () => window.location.reload();
             xhr.open('POST', '/upload', true);
             xhr.send(formData);
         };
