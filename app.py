@@ -18,7 +18,6 @@ def index():
         for blob in blobs:
             total_bytes += blob['size']
             parts = blob['pathname'].split('/')
-            # Grouping files into a single folder card
             folder_name = parts[0] if len(parts) > 1 else "Root Files"
             if folder_name not in folders: folders[folder_name] = []
             folders[folder_name].append(blob)
