@@ -3,95 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/jpeg" href="/static/channels4_profile.png.jpg">
-    <title>Safar Edge | Eternal Link</title>
+    <title>BRC | Eternal Data</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
-        :root { --accent: #ff4d00; --bg: #050200; }
+        :root { --accent: #ff5500; --bg: #080808; }
         
-        body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: white; margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
 
-        /* FIXED GLASS SIDEBAR (OLD STYLE) */
+        /* FIXED SIDEBAR FIX */
         aside {
-            position: fixed; top: 20px; left: 20px; bottom: 20px;
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.1); z-index: 100; border-radius: 2.5rem;
-            width: 100px; display: flex; flex-col; align-items: center; padding: 40px 0;
+            width: 80px; height: calc(100vh - 40px); margin: 20px;
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem;
+            display: flex; flex-direction: column; align-items: center; padding: 30px 0;
+            flex-shrink: 0;
         }
 
         .logo-box { 
-            width: 60px; height: 60px; border-radius: 20px; overflow: hidden; 
-            border: 2px solid transparent; transition: 0.4s; 
+            width: 50px; height: 50px; border-radius: 12px; overflow: hidden; 
+            border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; 
         }
-        .logo-box:hover { border-color: var(--accent); box-shadow: 0 0 30px var(--accent); transform: scale(1.1); }
+        .logo-box:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent); }
 
-        /* FIRE INDICATOR */
-        .fire-box {
-            position: relative; width: 50px; height: 50px; margin-top: auto;
-            display: flex; align-items: center; justify-content: center;
-        }
+        /* FIRE INDICATOR FIX */
+        .fire-container { margin-top: auto; position: relative; width: 40px; height: 40px; }
         .flame {
-            position: absolute; bottom: 10px; width: 25px; height: 25px;
+            position: absolute; bottom: 5px; left: 10px; width: 20px; height: 20px;
             background: var(--accent); border-radius: 50% 0 50% 50%;
             transform: rotate(-45deg); filter: blur(1px);
-            animation: burn 0.6s infinite alternate;
-            box-shadow: 0 0 15px var(--accent), 0 0 30px #ff0000;
+            animation: burn 0.5s infinite alternate;
+            box-shadow: 0 0 15px var(--accent), 0 0 25px #ff0000;
         }
-        @keyframes burn { from { transform: rotate(-45deg) scale(1); } to { transform: rotate(-45deg) scale(1.3); } }
+        @keyframes burn { from { transform: rotate(-45deg) scale(1); } to { transform: rotate(-45deg) scale(1.2); } }
 
-        /* UPLOAD PROGRESS */
-        #progress-container { display: none; margin-top: 20px; text-align: left; }
-        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, #ff4d00, #ff9500); width: 0%; transition: width 0.2s; }
+        main { flex-grow: 1; padding: 60px; overflow-y: auto; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 2.5rem; padding: 40px; backdrop-filter: blur(10px);
+        }
 
-        main { margin-left: 140px; height: 100vh; overflow-y: auto; padding: 60px; }
+        .btn-primary {
+            background: var(--accent); color: black; font-weight: 900; 
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 85, 0, 0.3); background: white; }
     </style>
 </head>
 <body>
 
     <aside>
-        <div class="logo-box mb-10">
-            <img src="/static/channels4_profile.png.jpg" onerror="this.src='https://ui-avatars.com/api/?name=S&background=ff4d00&color=fff'" class="w-full h-full object-cover">
+        <div class="logo-box mb-8">
+            <img src="/static/channels4_profile.png.jpg" onerror="this.src='https://ui-avatars.com/api/?name=BRC&background=ff5500&color=fff'" class="w-full h-full object-cover">
         </div>
         
-        <nav class="flex flex-col gap-10 text-white/30">
-            <button onclick="showPage('up')" class="hover:text-orange-500 transition"><i data-lucide="zap"></i></button>
-            <button onclick="showPage('list')" class="hover:text-orange-500 transition"><i data-lucide="database"></i></button>
+        <nav class="flex flex-col gap-8 text-white/20">
+            <button onclick="showPage('up')" class="hover:text-white transition"><i data-lucide="upload-cloud"></i></button>
+            <button onclick="showPage('list')" class="hover:text-white transition"><i data-lucide="layers"></i></button>
         </nav>
 
-        <div class="fire-box">
+        <div class="fire-container">
             <div class="flame"></div>
         </div>
     </aside>
 
-    <main id="main-content">
-        <header class="mb-20">
-            <h1 class="text-8xl font-black italic tracking-tighter">SAFAR EDGE<span class="text-orange-600">.</span></h1>
-            <div class="mt-6 flex items-center gap-4">
-                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Cloud Load: {{ used_gb }} GB / 100,000 GB</span>
-                <div class="w-32 h-1 bg-white/5 rounded-full"><div class="h-full bg-orange-600" style="width: {{ percent }}%"></div></div>
+    <main>
+        <header class="mb-16">
+            <h1 class="text-7xl font-black italic tracking-tighter">BRC<span class="text-orange-600">.</span></h1>
+            <div class="mt-4 flex items-center gap-4 text-white/30 font-bold text-[10px] uppercase tracking-widest">
+                <span>Eternal Load: {{ used_gb }} GB / 100,000 GB</span>
+                <div class="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-orange-600" style="width: {{ percent }}%"></div>
+                </div>
             </div>
         </header>
 
         <section id="up" class="page">
-            <div class="max-w-2xl bg-white/[0.02] border border-white/5 p-16 rounded-[3.5rem] backdrop-blur-xl">
+            <div class="glass-card max-w-xl">
+                <h2 class="text-2xl font-black mb-2 uppercase">Injection Terminal</h2>
+                <p class="text-white/30 mb-10 text-sm">Upload folders to the BRC permanent sector.</p>
+                
                 <form id="upload-form">
-                    <h2 class="text-3xl font-black mb-2 uppercase">Eternal Sync</h2>
-                    <p class="text-white/30 mb-10 text-sm">Upload folders to keep them forever in the neural cloud.</p>
-                    
-                    <input type="file" id="file-input" webkitdirectory directory multiple class="block w-full text-sm text-white/20 mb-8">
-                    
-                    <button type="submit" class="w-full py-6 rounded-2xl bg-orange-600 text-black font-black uppercase tracking-widest hover:bg-white transition-all">Start Injection</button>
+                    <div class="border-2 border-dashed border-white/5 rounded-3xl p-10 mb-8 hover:border-orange-500/50 transition-all group">
+                        <input type="file" id="file-input" webkitdirectory directory multiple class="block w-full text-sm text-white/20">
+                    </div>
+                    <button type="submit" class="btn-primary w-full py-5 rounded-2xl">Execute Upload</button>
                 </form>
 
-                <div id="progress-container">
+                <div id="progress-box" class="hidden mt-8">
                     <div class="flex justify-between text-[10px] font-bold mb-2">
-                        <span class="text-orange-500">TRANSFERRING...</span>
+                        <span class="text-orange-500">SYNCING DATA...</span>
                         <span id="pct">0%</span>
                     </div>
-                    <div class="bar-bg"><div id="bar" class="bar-fill"></div></div>
+                    <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div id="bar" class="h-full bg-orange-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -100,19 +108,19 @@
             <div class="grid gap-4 max-w-4xl">
                 {% if items %}
                     {% for item in items %}
-                    <div class="flex items-center justify-between p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem] hover:bg-white/[0.08] transition-all">
-                        <div class="flex items-center gap-6">
-                            <i data-lucide="file-code" class="text-orange-500"></i>
-                            <span class="text-xl font-bold italic tracking-tight">{{ item.pathname }}</span>
+                    <div class="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:bg-white/[0.05] transition-all">
+                        <div class="flex items-center gap-4">
+                            <i data-lucide="file" class="text-orange-500 w-5 h-5"></i>
+                            <span class="font-bold text-sm tracking-tight">{{ item.pathname }}</span>
                         </div>
-                        <div class="flex gap-4">
-                            <a href="{{ item.url }}" download class="p-4 bg-white text-black rounded-2xl"><i data-lucide="download"></i></a>
-                            <a href="/delete/{{ item.url }}" class="p-4 bg-red-600/10 text-red-500 rounded-2xl border border-red-500/20"><i data-lucide="trash-2"></i></a>
+                        <div class="flex gap-2">
+                            <a href="{{ item.url }}" download class="p-3 bg-white text-black rounded-xl hover:scale-105 transition"><i data-lucide="download" class="w-4 h-4"></i></a>
+                            <a href="/delete/{{ item.url }}" class="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
                         </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-white/10 italic">Cloud storage is currently empty...</p>
+                    <p class="text-white/10 italic">Sector is empty...</p>
                 {% endif %}
             </div>
         </section>
@@ -121,7 +129,6 @@
     <script>
         lucide.createIcons();
 
-        // UPLOAD WITH PROGRESS
         const form = document.getElementById('upload-form');
         form.onsubmit = async (e) => {
             e.preventDefault();
@@ -132,7 +139,7 @@
             for (const file of files) formData.append('file', file, file.webkitRelativePath);
 
             const xhr = new XMLHttpRequest();
-            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('progress-box').classList.remove('hidden');
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
