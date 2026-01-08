@@ -4,159 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpeg" href="/static/channels4_profile.png.jpg">
-    <title>Safar Edge | NextGen Dashboard</title>
-    
+    <title>Safar Edge | Eternal Link</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
-
-        :root { --accent: #10b981; --bg: #030305; }
-        [data-theme="nature"] { --accent: #10b981; --bg: #040806; }
-        [data-theme="ocean"] { --accent: #0ea5e9; --bg: #020617; }
-        [data-theme="smile"] { --accent: #f59e0b; --bg: #0f0a02; }
-
-        body { 
-            background-color: var(--bg); color: white; margin: 0; 
-            overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; 
-            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
+        :root { --accent: #ff4d00; --bg: #050200; }
         
-        /* --- SIDEBAR STYLE --- */
+        body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; }
+
+        /* FIXED GLASS SIDEBAR (OLD STYLE) */
         aside {
             position: fixed; top: 20px; left: 20px; bottom: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 100; border-radius: 2.5rem;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1); z-index: 100; border-radius: 2.5rem;
+            width: 100px; display: flex; flex-col; align-items: center; padding: 40px 0;
         }
 
-        .nav-link { 
-            display: flex; align-items: center; padding: 14px 18px; 
-            width: 100%; border-radius: 20px; transition: 0.3s; 
-            color: rgba(255,255,255,0.4); 
-        }
-        .nav-link.active, .nav-link:hover { 
-            background: rgba(255,255,255,0.08); color: var(--accent); 
-        }
-
-        /* --- LOGO GLOW --- */
         .logo-box { 
-            width: 50px; height: 50px; border-radius: 16px; 
-            overflow: hidden; border: 2px solid transparent; 
-            transition: 0.4s; box-shadow: 0 0 0 var(--accent);
+            width: 60px; height: 60px; border-radius: 20px; overflow: hidden; 
+            border: 2px solid transparent; transition: 0.4s; 
         }
-        .logo-box:hover { 
-            border-color: var(--accent); 
-            box-shadow: 0 0 30px var(--accent); 
-            transform: scale(1.1) rotate(3deg); 
-        }
+        .logo-box:hover { border-color: var(--accent); box-shadow: 0 0 30px var(--accent); transform: scale(1.1); }
 
-        /* --- STORAGE BAR --- */
-        .storage-container {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-            padding: 15px; border-radius: 24px; margin-top: 20px;
+        /* FIRE INDICATOR */
+        .fire-box {
+            position: relative; width: 50px; height: 50px; margin-top: auto;
+            display: flex; align-items: center; justify-content: center;
         }
+        .flame {
+            position: absolute; bottom: 10px; width: 25px; height: 25px;
+            background: var(--accent); border-radius: 50% 0 50% 50%;
+            transform: rotate(-45deg); filter: blur(1px);
+            animation: burn 0.6s infinite alternate;
+            box-shadow: 0 0 15px var(--accent), 0 0 30px #ff0000;
+        }
+        @keyframes burn { from { transform: rotate(-45deg) scale(1); } to { transform: rotate(-45deg) scale(1.3); } }
+
+        /* UPLOAD PROGRESS */
+        #progress-container { display: none; margin-top: 20px; text-align: left; }
         .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .bar-fill { height: 100%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: width 1s ease; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #ff4d00, #ff9500); width: 0%; transition: width 0.2s; }
 
-        /* --- ANIMATIONS --- */
-        #ani-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-        .wave { 
-            position: absolute; bottom: 0; width: 200%; height: 150px; 
-            background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg') repeat-x; 
-            opacity: 0.1; animation: moveWave 10s linear infinite; display: none; 
-        }
-        @keyframes moveWave { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        
-        .leaf { position: absolute; top: -50px; font-size: 24px; animation: leafFall 8s linear infinite; display: none; }
-        @keyframes leafFall { 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
-
-        main { transition: all 0.5s ease; margin-left: 110px; }
+        main { margin-left: 140px; height: 100vh; overflow-y: auto; padding: 60px; }
     </style>
 </head>
-<body data-theme="nature">
+<body>
 
-    <div id="ani-layer">
-        <div id="wave-ani" class="wave"></div>
-        <div id="leaf-box"></div>
-        <img id="smile-img" src="https://www.svgrepo.com/show/419918/smile-emoji-emoticon.svg" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 opacity-5 hidden">
-    </div>
-
-    <aside id="sidebar" class="w-24 py-10 flex flex-col items-center overflow-hidden">
-        <div class="mb-12">
-            <div class="logo-box">
-                <img src="/static/channels4_profile.png.jpg" onerror="this.src='https://ui-avatars.com/api/?name=S&background=10b981&color=fff'" class="w-full h-full object-cover">
-            </div>
+    <aside>
+        <div class="logo-box mb-10">
+            <img src="/static/channels4_profile.png.jpg" onerror="this.src='https://ui-avatars.com/api/?name=S&background=ff4d00&color=fff'" class="w-full h-full object-cover">
         </div>
-
-        <nav class="flex-1 w-full px-4 space-y-6">
-            <button onclick="showPage('upload-sec', this)" class="nav-link active">
-                <i data-lucide="plus-circle"></i><span class="sidebar-text hidden ml-4 font-bold">Upload</span>
-            </button>
-            <button onclick="showPage('files-sec', this)" class="nav-link">
-                <i data-lucide="folder-git-2"></i><span class="sidebar-text hidden ml-4 font-bold">Cloud</span>
-            </button>
+        
+        <nav class="flex flex-col gap-10 text-white/30">
+            <button onclick="showPage('up')" class="hover:text-orange-500 transition"><i data-lucide="zap"></i></button>
+            <button onclick="showPage('list')" class="hover:text-orange-500 transition"><i data-lucide="database"></i></button>
         </nav>
 
-        <div class="px-4 w-full border-t border-white/5 pt-8 space-y-6">
-            <div id="theme-grid" class="hidden grid grid-cols-2 gap-3 mb-2">
-                <div onclick="setTheme('nature')" class="w-8 h-8 rounded-full bg-emerald-500 cursor-pointer"></div>
-                <div onclick="setTheme('ocean')" class="w-8 h-8 rounded-full bg-blue-500 cursor-pointer"></div>
-                <div onclick="setTheme('smile')" class="w-8 h-8 rounded-full bg-amber-500 cursor-pointer"></div>
-            </div>
-            <button onclick="toggleSidebar()" class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 transition mx-auto">
-                <i data-lucide="layers"></i>
-            </button>
+        <div class="fire-box">
+            <div class="flame"></div>
         </div>
     </aside>
 
-    <main id="main-content" class="p-10 md:p-24 relative z-10">
-        
-        <div class="max-w-4xl mb-16">
-            <h1 class="text-7xl font-black tracking-tighter mb-4">Safar Edge.</h1>
-            <div class="storage-container w-72">
-                <div class="flex justify-between text-[10px] uppercase font-bold mb-2 opacity-50">
-                    <span>Usage</span>
-                    <span>{{ used_gb }} GB / 1 Lakh GB</span>
-                </div>
-                <div class="bar-bg">
-                    <div class="bar-fill" style="width: {{ (used_gb / 100000) * 100 }}%"></div>
+    <main id="main-content">
+        <header class="mb-20">
+            <h1 class="text-8xl font-black italic tracking-tighter">SAFAR EDGE<span class="text-orange-600">.</span></h1>
+            <div class="mt-6 flex items-center gap-4">
+                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Cloud Load: {{ used_gb }} GB / 100,000 GB</span>
+                <div class="w-32 h-1 bg-white/5 rounded-full"><div class="h-full bg-orange-600" style="width: {{ percent }}%"></div></div>
+            </div>
+        </header>
+
+        <section id="up" class="page">
+            <div class="max-w-2xl bg-white/[0.02] border border-white/5 p-16 rounded-[3.5rem] backdrop-blur-xl">
+                <form id="upload-form">
+                    <h2 class="text-3xl font-black mb-2 uppercase">Eternal Sync</h2>
+                    <p class="text-white/30 mb-10 text-sm">Upload folders to keep them forever in the neural cloud.</p>
+                    
+                    <input type="file" id="file-input" webkitdirectory directory multiple class="block w-full text-sm text-white/20 mb-8">
+                    
+                    <button type="submit" class="w-full py-6 rounded-2xl bg-orange-600 text-black font-black uppercase tracking-widest hover:bg-white transition-all">Start Injection</button>
+                </form>
+
+                <div id="progress-container">
+                    <div class="flex justify-between text-[10px] font-bold mb-2">
+                        <span class="text-orange-500">TRANSFERRING...</span>
+                        <span id="pct">0%</span>
+                    </div>
+                    <div class="bar-bg"><div id="bar" class="bar-fill"></div></div>
                 </div>
             </div>
-        </div>
-
-        <section id="upload-sec" class="page-content block">
-            <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-xl p-1 bg-gradient-to-br from-white/10 to-transparent rounded-[3rem]">
-                <div class="bg-black/40 backdrop-blur-md rounded-[2.9rem] p-16 text-center border border-white/10">
-                    <input type="file" name="file" webkitdirectory directory multiple class="block w-full text-sm text-white/20 mb-10">
-                    <button type="submit" class="w-full py-5 rounded-2xl font-black uppercase text-black transition-all hover:scale-105 active:scale-95 shadow-2xl" style="background: var(--accent);">Deploy Workspace</button>
-                </div>
-            </form>
         </section>
 
-        <section id="files-sec" class="page-content hidden">
-            <div class="grid gap-4 max-w-3xl">
+        <section id="list" class="hidden">
+            <div class="grid gap-4 max-w-4xl">
                 {% if items %}
                     {% for item in items %}
-                    <div class="flex items-center justify-between p-6 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.06] transition-all">
-                        <div class="flex items-center gap-5">
-                            <i data-lucide="{{ 'folder' if item.is_dir else 'file-text' }}" class="text-accent w-7 h-7"></i>
-                            <span class="text-xl font-bold">{{ item.name }}</span>
+                    <div class="flex items-center justify-between p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem] hover:bg-white/[0.08] transition-all">
+                        <div class="flex items-center gap-6">
+                            <i data-lucide="file-code" class="text-orange-500"></i>
+                            <span class="text-xl font-bold italic tracking-tight">{{ item.pathname }}</span>
                         </div>
-                        <div class="flex gap-3">
-                            <a href="/download/{{ item.name }}" class="px-6 py-3 bg-white text-black font-bold rounded-xl text-sm">Download</a>
-                            <a href="/delete/{{ item.name }}" onclick="return confirm('Delete permanently?')" class="px-4 py-3 bg-red-500/10 text-red-500 border border-red-500/20 font-bold rounded-xl text-sm hover:bg-red-500 hover:text-white transition">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </a>
+                        <div class="flex gap-4">
+                            <a href="{{ item.url }}" download class="p-4 bg-white text-black rounded-2xl"><i data-lucide="download"></i></a>
+                            <a href="/delete/{{ item.url }}" class="p-4 bg-red-600/10 text-red-500 rounded-2xl border border-red-500/20"><i data-lucide="trash-2"></i></a>
                         </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-white/20 italic">No project folders found...</p>
+                    <p class="text-white/10 italic">Cloud storage is currently empty...</p>
                 {% endif %}
             </div>
         </section>
@@ -164,42 +120,38 @@
 
     <script>
         lucide.createIcons();
-        let isOpen = false;
 
-        function toggleSidebar() {
-            isOpen = !isOpen;
-            const side = document.getElementById('sidebar');
-            const main = document.getElementById('main-content');
-            side.style.width = isOpen ? '280px' : '96px';
-            main.style.marginLeft = isOpen ? '300px' : '110px';
-            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !isOpen));
-            document.getElementById('theme-grid').classList.toggle('hidden', !isOpen);
-        }
+        // UPLOAD WITH PROGRESS
+        const form = document.getElementById('upload-form');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const files = document.getElementById('file-input').files;
+            if (!files.length) return;
 
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            document.getElementById('wave-ani').style.display = theme === 'ocean' ? 'block' : 'none';
-            document.getElementById('smile-img').style.display = theme === 'smile' ? 'block' : 'none';
-            const lb = document.getElementById('leaf-box'); lb.innerHTML = '';
-            if(theme === 'nature') {
-                for(let i=0; i<15; i++) {
-                    const l = document.createElement('div');
-                    l.className = 'leaf'; l.innerHTML = '🍃';
-                    l.style.left = Math.random() * 100 + 'vw';
-                    l.style.animationDelay = Math.random() * 5 + 's';
-                    l.style.display = 'block'; lb.appendChild(l);
+            const formData = new FormData();
+            for (const file of files) formData.append('file', file, file.webkitRelativePath);
+
+            const xhr = new XMLHttpRequest();
+            document.getElementById('progress-container').style.display = 'block';
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const p = Math.round((e.loaded / e.total) * 100);
+                    document.getElementById('bar').style.width = p + '%';
+                    document.getElementById('pct').innerText = p + '%';
                 }
-            }
-        }
+            };
 
-        function showPage(id, btn) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.replace('block', 'hidden'));
-            document.getElementById(id).classList.replace('hidden', 'block');
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            btn.classList.add('active');
-        }
+            xhr.onload = () => { if(xhr.status === 200) window.location.reload(); };
+            xhr.open('POST', '/upload', true);
+            xhr.send(formData);
+        };
 
-        setTheme('nature');
+        function showPage(id) {
+            document.getElementById('up').classList.add('hidden');
+            document.getElementById('list').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
