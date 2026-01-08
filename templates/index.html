@@ -3,197 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/jpeg" href="/static/channels4_profile.png.jpg">
-    <title>Safar Edge | Pro Dashboard</title>
+    <title>SAFAR EDGE // ARCHIVE_01</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --accent: #10b981; --bg: #030305; }
-        [data-theme="nature"] { --accent: #10b981; --bg: #040806; }
-        [data-theme="ocean"] { --accent: #0ea5e9; --bg: #020617; }
-        [data-theme="smile"] { --accent: #f59e0b; --bg: #0f0a02; }
-
-        body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; transition: 0.8s ease; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@300;700&display=swap');
         
-        aside {
-            position: fixed; top: 20px; left: 20px; bottom: 20px;
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1); z-index: 100;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .nav-link { display: flex; align-items: center; padding: 14px 18px; border-radius: 18px; transition: 0.3s; color: rgba(255,255,255,0.4); width: 100%; text-align: left; }
-        .nav-link.active { background: rgba(255,255,255,0.05); color: var(--accent); }
-
-        /* Real Logo Glow Effect */
-        .logo-container {
-            width: 52px; height: 52px; border-radius: 16px; overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.1); transition: 0.5s;
-            box-shadow: 0 0 0 var(--accent);
-        }
-        .logo-container:hover {
-            transform: scale(1.15) rotate(5deg);
-            border-color: var(--accent);
-            box-shadow: 0 0 30px var(--accent);
-        }
-
-        /* Animations */
-        #ani-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-        .ocean-container { position: absolute; bottom: 0; width: 100%; height: 20%; overflow: hidden; display: none; }
-        .wave { background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg') repeat-x; position: absolute; top: -55px; width: 6400px; height: 198px; animation: wave 7s linear infinite; opacity: 0.15; }
-        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-1600px); } }
+        :root { --neon: #00f3ff; --pink: #ff00ff; --danger: #ff3131; --bg: #020203; }
         
-        .leaf { position: absolute; top: -50px; font-size: 24px; animation: leafFall 8s linear infinite; display: none; }
-        @keyframes leafFall { 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
-
-        #progress-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(20px); z-index: 1000;
-            display: none; align-items: center; justify-content: center;
+        body { 
+            background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #0a0a12 0%, #020203 100%);
         }
+
+        /* Cyberpunk Grid Background */
+        .grid-bg {
+            position: fixed; inset: 0; pointer-events: none; z-index: -1;
+            background-image: linear-gradient(to right, rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .cyber-panel {
+            background: rgba(5, 5, 10, 0.8); border: 1px solid var(--neon);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+            position: relative; overflow: hidden;
+        }
+
+        .cyber-panel::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--neon); box-shadow: 0 0 10px var(--neon);
+        }
+
+        .glitch-header {
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-style: italic;
+            text-transform: uppercase; color: #fff; text-shadow: 2px 2px var(--pink);
+        }
+
+        /* Neural Storage Bar */
+        .storage-track { height: 8px; background: #0a0a0f; border: 1px solid #1a1a2e; border-radius: 2px; }
+        .storage-bar { height: 100%; background: linear-gradient(90deg, var(--neon), var(--pink)); box-shadow: 0 0 15px var(--neon); transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .btn-action { transition: 0.2s; border: 1px solid transparent; }
+        .btn-download { color: var(--neon); border-color: var(--neon); }
+        .btn-download:hover { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon); }
+        
+        .btn-delete { color: var(--danger); border-color: var(--danger); }
+        .btn-delete:hover { background: var(--danger); color: #fff; box-shadow: 0 0 20px var(--danger); }
+
+        /* Scanning Line Animation */
+        .scanline {
+            width: 100%; height: 2px; background: rgba(0, 243, 255, 0.1);
+            position: fixed; top: 0; left: 0; z-index: 999;
+            animation: scan 4s linear infinite; pointer-events: none;
+        }
+        @keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
     </style>
 </head>
-<body data-theme="nature">
+<body class="p-6">
+    <div class="grid-bg"></div>
+    <div class="scanline"></div>
 
-    <div id="progress-modal">
-        <div class="w-full max-w-md p-10 bg-white/5 border border-white/10 rounded-[3rem] text-center">
-            <i data-lucide="loader" class="w-16 h-16 mx-auto mb-6 text-accent animate-spin"></i>
-            <h2 class="text-2xl font-bold mb-2">Safar Edge is Zipping...</h2>
-            <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden mt-6">
-                <div id="bar" class="h-full bg-accent transition-all duration-300" style="width: 0%"></div>
-            </div>
-            <p id="percent" class="mt-4 font-mono text-accent">0%</p>
-        </div>
-    </div>
-
-    <div id="ani-layer">
-        <div class="ocean-container" id="ocean-ani"><div class="wave"></div></div>
-        <div id="leaf-box"></div>
-        <img id="smile-img" src="https://www.svgrepo.com/show/419918/smile-emoji-emoticon.svg" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 opacity-5 hidden">
-    </div>
-
-    <aside id="sidebar" class="w-20 rounded-[2.5rem] py-10 flex flex-col items-start overflow-hidden shadow-2xl">
-        <div class="px-4 mb-14">
-            <div class="logo-container">
-                <img src="/static/channels4_profile.png.jpg" 
-                     onerror="this.src='https://ui-avatars.com/api/?name=Safar+Edge&background=10b981&color=fff'"
-                     class="w-full h-full object-cover">
-            </div>
+    <header class="max-w-7xl mx-auto mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="text-center md:text-left">
+            <h1 class="text-5xl glitch-header">Safar Edge_v4</h1>
+            <p class="text-cyan-500 font-bold text-xs tracking-[0.4em] mt-2 uppercase opacity-60">Neural Storage Protocol Activated</p>
         </div>
 
-        <nav class="flex-1 w-full px-3 space-y-4">
-            <button onclick="showPage('tools', this)" class="nav-link active">
-                <i data-lucide="plus-square"></i><span class="sidebar-text hidden ml-4 font-bold">New Upload</span>
-            </button>
-            <button onclick="showPage('downloads', this)" class="nav-link">
-                <i data-lucide="folder-search"></i><span class="sidebar-text hidden ml-4 font-bold">Project Files</span>
-            </button>
-        </nav>
-
-        <div class="px-4 w-full border-t border-white/5 pt-8 space-y-6">
-            <div id="theme-grid" class="hidden grid grid-cols-2 gap-4">
-                <div onclick="setTheme('nature')" class="w-10 h-10 rounded-2xl bg-emerald-500 cursor-pointer shadow-lg"></div>
-                <div onclick="setTheme('ocean')" class="w-10 h-10 rounded-2xl bg-blue-500 cursor-pointer shadow-lg"></div>
-                <div onclick="setTheme('smile')" class="w-10 h-10 rounded-2xl bg-amber-500 cursor-pointer shadow-lg"></div>
+        <div class="w-full md:w-96 bg-black/40 p-4 border border-white/5 rounded-lg">
+            <div class="flex justify-between text-[10px] uppercase font-bold mb-2">
+                <span class="text-white/50">Storage Load</span>
+                <span class="text-cyan-400">{{ used_gb }} GB / 100,000 GB</span>
             </div>
-            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 mx-auto transition shadow-inner">
-                <i data-lucide="palette"></i>
-            </button>
+            <div class="storage-track">
+                <div class="storage-bar" style="width: {{ percent }}%"></div>
+            </div>
         </div>
-    </aside>
+    </header>
 
-    <main id="main-content" class="flex-1 p-10 md:p-24 transition-all ml-[80px]">
-        <section id="tools" class="page-content block">
-            <h1 class="text-8xl font-black tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/20">Safar Edge.</h1>
-            <p class="text-white/40 text-2xl mb-16">The ultimate workspace for your tutorials.</p>
-            
-            <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-xl p-1 bg-gradient-to-br from-white/20 to-transparent rounded-[3.5rem] shadow-2xl">
-                <div class="bg-[#050508] rounded-[3.4rem] p-14 text-center border border-white/5">
-                    <input type="file" name="file" webkitdirectory directory multiple class="block w-full text-sm text-white/30 mb-12 file:bg-white/5 file:border-0 file:text-white file:rounded-full file:px-4 file:py-2">
-                    <button type="submit" class="w-full py-6 rounded-3xl font-black uppercase tracking-widest text-black hover:scale-105 transition-all shadow-[0_20px_50px_rgba(0,0,0,0.5)]" style="background: var(--accent);">Deploy Workspace</button>
-                </div>
-            </form>
-        </section>
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <aside class="lg:col-span-1">
+            <div class="cyber-panel p-6">
+                <h3 class="text-xs font-black uppercase tracking-widest text-pink-500 mb-6">Inject Data Stream</h3>
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <label class="block border-2 border-dashed border-cyan-900/50 hover:border-cyan-400/50 p-8 text-center cursor-pointer transition-all mb-4 group">
+                        <input type="file" name="file" webkitdirectory directory multiple class="hidden" onchange="this.form.submit()">
+                        <i data-lucide="folder-plus" class="w-10 h-10 mx-auto mb-3 text-cyan-900 group-hover:text-cyan-400"></i>
+                        <p class="text-[10px] uppercase font-bold text-white/30">Select Workspace</p>
+                    </label>
+                    <p class="text-[9px] text-center text-white/20 italic italic uppercase">Max Packet: 100 TB</p>
+                </form>
+            </div>
+        </aside>
 
-        <section id="downloads" class="page-content hidden">
-            <h1 class="text-7xl font-black tracking-tighter mb-16">Cloud Storage.</h1>
-            <div class="grid gap-6 max-w-3xl">
-                {% for item in items %}
-                <div class="flex items-center justify-between p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] backdrop-blur-3xl hover:bg-white/[0.05] transition-all group">
-                    <div class="flex items-center gap-6">
-                        <div class="p-4 rounded-2xl bg-white/5 text-accent group-hover:scale-110 transition">
-                            <i data-lucide="{{ 'folder' if item.is_dir else 'file-code' }}" class="w-8 h-8"></i>
+        <div class="lg:col-span-3">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold uppercase tracking-tighter flex items-center gap-2">
+                    <span class="w-2 h-2 bg-cyan-500 animate-pulse"></span> Active Archives
+                </h2>
+            </div>
+
+            <div class="grid gap-4">
+                {% if items %}
+                    {% for item in items %}
+                    <div class="cyber-panel p-5 flex items-center justify-between group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 flex items-center justify-center bg-cyan-500/5 border border-cyan-500/20">
+                                <i data-lucide="{{ 'folder' if item.is_dir else 'file-text' }}" class="text-cyan-400 w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold tracking-tight text-white/90 uppercase text-sm">{{ item.name }}</h4>
+                                <p class="text-[10px] text-cyan-700 font-bold uppercase">{{ 'Directory' if item.is_dir else 'Static File' }}</p>
+                            </div>
                         </div>
-                        <span class="text-2xl font-bold tracking-tight">{{ item.name }}</span>
+
+                        <div class="flex gap-2">
+                            <a href="/download/{{ item.name }}" class="p-3 btn-action btn-download rounded-sm">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </a>
+                            <a href="/delete/{{ item.name }}" 
+                               onclick="return confirm('Confirm data purge?')" 
+                               class="p-3 btn-action btn-delete rounded-sm">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </a>
+                        </div>
                     </div>
-                    <button onclick="handleDownload('{{ item.name }}', {{ 'true' if item.is_dir else 'false' }})" class="px-10 py-4 bg-white text-black font-black rounded-2xl hover:bg-accent hover:text-white transition-all shadow-xl">Get</button>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <div class="border border-white/5 bg-white/5 py-20 text-center rounded-lg">
+                        <p class="text-white/20 uppercase text-xs font-bold tracking-[0.3em]">No Data Found in Current Sector</p>
+                    </div>
+                {% endif %}
             </div>
-        </section>
+        </div>
     </main>
 
     <script>
         lucide.createIcons();
-        let isOpen = false;
-
-        function toggleSidebar() {
-            isOpen = !isOpen;
-            document.getElementById('sidebar').style.width = isOpen ? '300px' : '90px';
-            document.getElementById('main-content').style.marginLeft = isOpen ? '320px' : '100px';
-            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !isOpen));
-            document.getElementById('theme-grid').classList.toggle('hidden', !isOpen);
-        }
-
-        async function handleDownload(name, isFolder) {
-            const safeName = encodeURIComponent(name);
-            if (isFolder) {
-                const modal = document.getElementById('progress-modal');
-                const bar = document.getElementById('bar');
-                const percent = document.getElementById('percent');
-                modal.style.display = 'flex';
-                let p = 0;
-                let int = setInterval(() => {
-                    p += Math.random() * 15;
-                    if (p > 98) p = 98;
-                    bar.style.width = p + '%';
-                    percent.innerText = Math.floor(p) + '%';
-                }, 400);
-
-                window.location.href = `/download/${safeName}`;
-                
-                setTimeout(() => {
-                    clearInterval(int);
-                    bar.style.width = '100%'; percent.innerText = '100%';
-                    setTimeout(() => { modal.style.display = 'none'; bar.style.width = '0%'; }, 1500);
-                }, 4500);
-            } else {
-                window.location.href = `/download/${safeName}`;
-            }
-        }
-
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            document.getElementById('ocean-ani').style.display = theme === 'ocean' ? 'block' : 'none';
-            document.getElementById('smile-img').style.display = theme === 'smile' ? 'block' : 'none';
-            const lb = document.getElementById('leaf-box'); lb.innerHTML = '';
-            if(theme === 'nature') {
-                for(let i=0; i<15; i++) {
-                    const l = document.createElement('div');
-                    l.className = 'leaf'; l.innerHTML = '🍃';
-                    l.style.left = Math.random() * 100 + 'vw';
-                    l.style.animationDelay = Math.random() * 5 + 's';
-                    l.style.display = 'block'; lb.appendChild(l);
-                }
-            }
-        }
-        function showPage(id, btn) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.replace('block', 'hidden'));
-            document.getElementById(id).classList.replace('hidden', 'block');
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            btn.classList.add('active');
-        }
-        setTheme('nature');
     </script>
 </body>
 </html>
