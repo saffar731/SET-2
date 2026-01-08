@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='channels4_profile.png.jpg') }}">
     <title>Safar Edge | Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -15,7 +14,6 @@
 
         body { background-color: var(--bg); color: white; margin: 0; overflow: hidden; height: 100vh; font-family: 'Inter', sans-serif; transition: background 0.8s ease; }
         
-        /* Sidebar Glassmorphism */
         aside {
             position: fixed; top: 20px; left: 20px; bottom: 20px;
             background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
@@ -29,33 +27,27 @@
         /* Animation Layers */
         #ani-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
         .ocean-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 15%; overflow: hidden; display: none; }
-        .wave { background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg') repeat-x; position: absolute; top: -55px; width: 6400px; height: 198px; animation: wave 7s cubic-bezier( 0.36, 0.45, 0.63, 0.53) infinite; opacity: 0.1; }
-        @keyframes wave { 0% { margin-left: 0; } 100% { margin-left: -1600px; } }
+        .wave { background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg') repeat-x; position: absolute; top: -55px; width: 6400px; height: 198px; animation: wave 7s linear infinite; opacity: 0.1; }
+        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-1600px); } }
 
         .leaf { position: absolute; top: -50px; font-size: 24px; animation: leafFall 8s linear infinite; display: none; }
         @keyframes leafFall { 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
 
-        /* PROGRESS MODAL */
         #progress-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px); z-index: 1000;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(15px); z-index: 1000;
             display: none; align-items: center; justify-content: center;
         }
-
-        /* LOGO GLOW */
-        .logo-box { width: 48px; height: 48px; border-radius: 14px; overflow: hidden; transition: 0.4s; border: 2px solid transparent; }
-        .logo-box:hover { border-color: var(--accent); box-shadow: 0 0 25px var(--accent); transform: scale(1.1); }
     </style>
 </head>
 <body data-theme="nature">
 
     <div id="progress-modal">
         <div class="w-full max-w-md p-10 bg-white/5 border border-white/10 rounded-[3rem] text-center">
-            <i data-lucide="package-search" class="w-16 h-16 mx-auto mb-6 text-accent animate-bounce"></i>
-            <h2 class="text-2xl font-bold mb-2">Safar Edge Zipping...</h2>
-            <p class="text-white/40 mb-8">Preparing your folder for download</p>
-            <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                <div id="bar" class="h-full bg-accent transition-all duration-300 shadow-[0_0_15px_var(--accent)]" style="width: 0%"></div>
+            <i data-lucide="package-open" class="w-16 h-16 mx-auto mb-6 text-accent animate-pulse"></i>
+            <h2 class="text-2xl font-bold mb-2">Compressing Folder...</h2>
+            <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden mt-6">
+                <div id="bar" class="h-full bg-accent transition-all duration-300" style="width: 0%"></div>
             </div>
             <p id="percent" class="mt-4 font-mono text-accent">0%</p>
         </div>
@@ -67,30 +59,32 @@
         <img id="smile-img" src="https://www.svgrepo.com/show/419918/smile-emoji-emoticon.svg" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 opacity-5 hidden">
     </div>
 
-    <aside id="sidebar" class="w-20 rounded-[2.5rem] py-8 flex flex-col items-start overflow-hidden shadow-2xl">
+    <aside id="sidebar" class="w-20 rounded-[2.5rem] py-8 flex flex-col items-start overflow-hidden">
         <div class="px-4 mb-12">
-            <div class="logo-box"><img src="{{ url_for('static', filename='channels4_profile.png.jpg') }}" class="w-full h-full object-cover"></div>
+            <div class="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center border border-accent/50 shadow-[0_0_20px_var(--accent)]">
+                <i data-lucide="zap" class="text-accent"></i>
+            </div>
         </div>
 
         <nav class="flex-1 w-full px-3 space-y-3">
-            <button onclick="showPage('tools', this)" class="nav-link active"><i data-lucide="layers"></i><span class="sidebar-text hidden ml-4 font-bold">Tools</span></button>
-            <button onclick="showPage('downloads', this)" class="nav-link"><i data-lucide="database"></i><span class="sidebar-text hidden ml-4 font-bold">Cloud</span></button>
+            <button onclick="showPage('tools', this)" class="nav-link active"><i data-lucide="upload-cloud"></i><span class="sidebar-text hidden ml-4 font-bold">Upload</span></button>
+            <button onclick="showPage('downloads', this)" class="nav-link"><i data-lucide="folder-kanban"></i><span class="sidebar-text hidden ml-4 font-bold">Projects</span></button>
         </nav>
 
         <div class="px-4 w-full border-t border-white/5 pt-6 space-y-4">
             <div id="theme-grid" class="hidden grid grid-cols-2 gap-3">
-                <div onclick="setTheme('nature')" class="w-8 h-8 rounded-full bg-emerald-500 cursor-pointer"></div>
-                <div onclick="setTheme('ocean')" class="w-8 h-8 rounded-full bg-blue-500 cursor-pointer"></div>
-                <div onclick="setTheme('smile')" class="w-8 h-8 rounded-full bg-amber-500 cursor-pointer"></div>
+                <div onclick="setTheme('nature')" class="w-8 h-8 rounded-full bg-emerald-500 cursor-pointer hover:scale-110 transition"></div>
+                <div onclick="setTheme('ocean')" class="w-8 h-8 rounded-full bg-blue-500 cursor-pointer hover:scale-110 transition"></div>
+                <div onclick="setTheme('smile')" class="w-8 h-8 rounded-full bg-amber-500 cursor-pointer hover:scale-110 transition"></div>
             </div>
-            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 mx-auto transition"><i data-lucide="wand-2"></i></button>
+            <button onclick="toggleSidebar()" class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 mx-auto transition"><i data-lucide="settings"></i></button>
         </div>
     </aside>
 
     <main id="main-content" class="flex-1 p-10 md:p-20 transition-all ml-[80px]">
         <section id="tools" class="page-content block">
-            <h1 class="text-7xl font-black tracking-tighter mb-4">Storage.</h1>
-            <p class="text-white/30 text-xl mb-12">Drag and drop your project folders to Safar Edge.</p>
+            <h1 class="text-7xl font-black tracking-tighter mb-4">Safar Edge.</h1>
+            <p class="text-white/30 text-xl mb-12">Drop your project folders here to store them.</p>
             <form action="/upload" method="POST" enctype="multipart/form-data" class="max-w-xl p-1 bg-gradient-to-br from-white/10 to-transparent rounded-[3rem]">
                 <div class="bg-[#0a0a0f] rounded-[2.9rem] p-12 text-center border border-white/5">
                     <input type="file" name="file" webkitdirectory directory multiple class="block w-full text-sm text-white/20 mb-10">
@@ -100,15 +94,15 @@
         </section>
 
         <section id="downloads" class="page-content hidden">
-            <h1 class="text-7xl font-black tracking-tighter mb-12">Projects.</h1>
+            <h1 class="text-7xl font-black tracking-tighter mb-12">Cloud.</h1>
             <div class="grid gap-4 max-w-2xl">
                 {% for item in items %}
-                <div class="flex items-center justify-between p-6 bg-white/[0.03] border border-white/10 rounded-[2rem]">
+                <div class="flex items-center justify-between p-6 bg-white/[0.03] border border-white/10 rounded-[3rem] backdrop-blur-xl">
                     <div class="flex items-center gap-5">
-                        <i data-lucide="{{ 'folder' if item.is_dir else 'file' }}" class="text-accent w-8 h-8"></i>
-                        <span class="text-xl font-bold">{{ item.name }}</span>
+                        <i data-lucide="{{ 'folder' if item.is_dir else 'file-text' }}" class="text-accent w-8 h-8"></i>
+                        <span class="text-xl font-bold tracking-tight">{{ item.name }}</span>
                     </div>
-                    <button onclick="handleDownload('{{ item.name }}', {{ 'true' if item.is_dir else 'false' }})" class="px-8 py-3 bg-white text-black font-black rounded-2xl">Download</button>
+                    <button onclick="handleDownload('{{ item.name }}', {{ 'true' if item.is_dir else 'false' }})" class="px-8 py-3 bg-white text-black font-black rounded-2xl hover:scale-105 transition active:scale-95">Get</button>
                 </div>
                 {% endfor %}
             </div>
@@ -121,22 +115,19 @@
 
         function toggleSidebar() {
             isOpen = !isOpen;
-            const side = document.getElementById('sidebar');
-            side.style.width = isOpen ? '280px' : '80px';
+            document.getElementById('sidebar').style.width = isOpen ? '280px' : '80px';
             document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden', !isOpen));
             document.getElementById('theme-grid').classList.toggle('hidden', !isOpen);
         }
 
         async function handleDownload(name, isFolder) {
+            const safeName = encodeURIComponent(name);
             if (isFolder) {
                 const modal = document.getElementById('progress-modal');
                 const bar = document.getElementById('bar');
                 const percent = document.getElementById('percent');
-                
                 modal.style.display = 'flex';
                 let p = 0;
-                
-                // Simulate zip progress while the server works
                 let interval = setInterval(() => {
                     p += Math.random() * 15;
                     if (p > 98) p = 98;
@@ -144,17 +135,15 @@
                     percent.innerText = Math.floor(p) + '%';
                 }, 400);
 
-                window.location.href = `/download/${name}`;
+                window.location.href = `/download/${safeName}`;
                 
-                // Close modal after a delay (assumes download started)
                 setTimeout(() => {
                     clearInterval(interval);
-                    bar.style.width = '100%';
-                    percent.innerText = '100%';
-                    setTimeout(() => modal.style.display = 'none', 800);
+                    bar.style.width = '100%'; percent.innerText = '100%';
+                    setTimeout(() => { modal.style.display = 'none'; bar.style.width = '0%'; }, 1000);
                 }, 4000);
             } else {
-                window.location.href = `/download/${name}`;
+                window.location.href = `/download/${safeName}`;
             }
         }
 
@@ -164,7 +153,7 @@
             document.getElementById('smile-img').style.display = theme === 'smile' ? 'block' : 'none';
             const lb = document.getElementById('leaf-box'); lb.innerHTML = '';
             if(theme === 'nature') {
-                for(let i=0; i<12; i++) {
+                for(let i=0; i<15; i++) {
                     const l = document.createElement('div');
                     l.className = 'leaf'; l.innerHTML = '🍃';
                     l.style.left = Math.random() * 100 + 'vw';
@@ -173,15 +162,13 @@
                 }
             }
         }
-
         function showPage(id, btn) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.replace('block', 'hidden'));
             document.getElementById(id).classList.replace('hidden', 'block');
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             btn.classList.add('active');
         }
-        setTheme('ocean');
+        setTheme('nature');
     </script>
 </body>
 </html>
-
