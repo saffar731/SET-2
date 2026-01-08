@@ -3,154 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRC | Master Dashboard</title>
+    <title>BRC | Eternal System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
-        :root { --accent: #ff5500; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); }
+        :root { --accent: #ff5500; --bg: #030303; }
         [data-theme="nature"] { --accent: #10b981; --bg: #040806; }
         [data-theme="ocean"] { --accent: #0ea5e9; --bg: #020617; }
         [data-theme="smile"] { --accent: #f59e0b; --bg: #0f0a02; }
 
         body { 
             background-color: var(--bg); color: white; margin: 0; 
-            font-family: 'Inter', sans-serif; display: flex; height: 100vh; 
-            transition: background 0.5s ease; overflow: hidden;
+            font-family: 'Inter', sans-serif; transition: background 0.6s ease; 
+            overflow: hidden; height: 100vh; 
         }
 
-        /* FIXED SIDEBAR */
+        /* --- THE OLD FLOATING SIDEBAR --- */
         aside {
-            width: 85px; height: calc(100vh - 40px); margin: 20px;
-            background: var(--glass); backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2.5rem;
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 35px 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            flex-shrink: 0; z-index: 50;
+            position: fixed; top: 20px; left: 20px; bottom: 20px;
+            width: 90px; background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 2.5rem; z-index: 100; display: flex; flex-direction: column;
+            align-items: center; padding: 40px 0; transition: width 0.4s ease;
         }
-        aside.expanded { width: 260px; align-items: flex-start; padding: 35px 25px; }
+        aside.expanded { width: 280px; align-items: flex-start; padding: 40px 25px; }
 
         .nav-link { 
-            display: flex; align-items: center; gap: 18px; width: 100%; 
-            padding: 16px; border-radius: 20px; color: rgba(255,255,255,0.3); 
-            transition: 0.3s; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 20px; width: 100%; 
+            padding: 18px; border-radius: 22px; color: rgba(255,255,255,0.2); 
+            transition: 0.3s; margin-bottom: 10px;
         }
-        .nav-link.active, .nav-link:hover { color: var(--accent); background: rgba(255,255,255,0.05); }
+        .nav-link.active, .nav-link:hover { color: var(--accent); background: rgba(255,255,255,0.06); }
         
-        .nav-text { 
-            opacity: 0; white-space: nowrap; transition: 0.3s; 
-            font-weight: 700; font-size: 0.9rem; pointer-events: none;
+        .nav-text { opacity: 0; white-space: nowrap; transition: 0.3s; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        aside.expanded .nav-text { opacity: 1; }
+
+        /* THEME SELECTOR DOTS */
+        .theme-panel { display: flex; flex-direction: column; gap: 15px; margin: 30px 0; }
+        aside.expanded .theme-panel { flex-direction: row; margin-left: 15px; }
+        .dot { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+
+        /* --- CONTENT WRAPPER --- */
+        main { margin-left: 130px; padding: 80px; height: 100vh; overflow-y: auto; transition: margin-left 0.4s ease; }
+        aside.expanded + main { margin-left: 320px; }
+
+        /* THE OLD FLAME */
+        .flame-indicator {
+            width: 35px; height: 35px; background: var(--accent); border-radius: 50% 0 50% 50%;
+            transform: rotate(-45deg); filter: blur(2px); animation: burn 0.6s infinite alternate;
+            box-shadow: 0 0 25px var(--accent); margin-top: auto;
         }
-        aside.expanded .nav-text { opacity: 1; pointer-events: auto; }
+        @keyframes burn { from { transform: rotate(-45deg) scale(1); } to { transform: rotate(-45deg) scale(1.3); } }
 
-        /* THEME SELECTOR */
-        .theme-container { display: flex; flex-direction: column; gap: 15px; margin: 25px 0; }
-        aside.expanded .theme-container { flex-direction: row; margin-left: 10px; }
-        .dot { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .dot:hover { transform: scale(1.2); border-color: white; }
-
-        /* CONTENT AREA */
-        main { flex-grow: 1; padding: 60px 80px; overflow-y: auto; }
-
-        .fire-box {
-            width: 30px; height: 30px; background: var(--accent); border-radius: 50% 0 50% 50%;
-            transform: rotate(-45deg); filter: blur(1px); animation: flame-burn 0.6s infinite alternate;
-            box-shadow: 0 0 20px var(--accent); margin-top: auto;
+        .glass-card {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 3.5rem; padding: 50px; backdrop-filter: blur(15px);
         }
-        @keyframes flame-burn { from { transform: rotate(-45deg) scale(1); } to { transform: rotate(-45deg) scale(1.25); } }
     </style>
 </head>
 <body data-theme="nature">
 
     <aside id="sidebar">
-        <div class="flex items-center gap-4 mb-12 ml-1">
-            <div class="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center font-black text-xl">B</div>
-            <span class="nav-text text-2xl tracking-tighter italic">BRC_SYS</span>
+        <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-12 flex-shrink-0 group cursor-pointer hover:rotate-6 transition">
+            <span class="text-black font-black text-2xl">B</span>
         </div>
         
         <nav class="w-full flex-1">
-            <button onclick="showPage('up-view', this)" class="nav-link active">
-                <i data-lucide="upload-cloud"></i> <span class="nav-text">Injection Terminal</span>
+            <button onclick="showPage('up-sec', this)" class="nav-link active">
+                <i data-lucide="zap"></i> <span class="nav-text">Inject</span>
             </button>
-            <button onclick="showPage('list-view', this)" class="nav-link">
-                <i data-lucide="folder-kanban"></i> <span class="nav-text">Neural Archives</span>
+            <button onclick="showPage('list-sec', this)" class="nav-link">
+                <i data-lucide="database"></i> <span class="nav-text">Archives</span>
             </button>
         </nav>
 
-        <div class="theme-container">
+        <div class="theme-panel">
             <div onclick="setTheme('nature')" class="dot bg-emerald-500"></div>
             <div onclick="setTheme('ocean')" class="dot bg-blue-500"></div>
             <div onclick="setTheme('smile')" class="dot bg-amber-500"></div>
         </div>
 
-        <button onclick="toggleSidebar()" class="nav-link mb-6">
-            <i data-lucide="menu"></i> <span class="nav-text">Expand Interface</span>
+        <button onclick="toggleSidebar()" class="nav-link mb-8">
+            <i data-lucide="menu"></i> <span class="nav-text">System Menu</span>
         </button>
 
-        <div class="fire-box"></div>
+        <div class="flame-indicator"></div>
     </aside>
 
-    <main>
+    <main id="main-content">
         <header class="mb-20">
-            <h1 class="text-8xl font-black italic tracking-tighter">BRC<span class="text-orange-600">.</span></h1>
-            <div class="mt-6 flex items-center gap-6">
-                <div class="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">
-                    Eternal Load: {{ used_gb }} GB / 100,000 GB
+            <h1 class="text-9xl font-black italic tracking-tighter uppercase">BRC<span class="text-orange-600">.</span></h1>
+            <div class="mt-8 flex items-center gap-6">
+                <div class="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">
+                    Neural Load: {{ used_gb }} GB / 100K GB
                 </div>
-                <div class="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
+                <div class="w-48 h-1.5 bg-white/5 rounded-full overflow-hidden">
                     <div class="h-full bg-orange-600 transition-all duration-1000" style="width: {{ percent }}%"></div>
                 </div>
             </div>
         </header>
 
-        <div id="up-view" class="page-content">
-            <div class="max-w-2xl bg-white/[0.02] border border-white/5 p-16 rounded-[3.5rem] backdrop-blur-xl">
-                <h2 class="text-3xl font-black mb-10 uppercase tracking-tight">Sync Folder</h2>
+        <section id="up-sec" class="page-content">
+            <div class="glass-card max-w-2xl">
+                <h2 class="text-3xl font-black mb-4 uppercase">Sync Transmission</h2>
+                <p class="text-white/30 mb-12 text-sm font-bold">Upload folders to the eternal BRC cloud sector.</p>
                 <form id="upload-form">
-                    <div class="mb-10 p-10 border-2 border-dashed border-white/5 rounded-3xl hover:border-orange-500/40 transition">
+                    <div class="mb-10 p-12 border-2 border-dashed border-white/5 rounded-[2rem] hover:border-orange-500/30 transition cursor-pointer">
                         <input type="file" id="file-input" webkitdirectory directory multiple class="block w-full text-sm text-white/20">
                     </div>
-                    <button type="submit" class="w-full py-6 rounded-2xl bg-white text-black font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all">Begin Transmission</button>
+                    <button type="submit" class="w-full py-6 rounded-2xl bg-orange-600 text-black font-black uppercase tracking-widest hover:bg-white transition-all">Begin Sync</button>
                 </form>
-                
-                <div id="prog-box" class="hidden mt-12">
-                    <div class="flex justify-between text-[10px] font-black mb-3">
-                        <span class="text-orange-500 tracking-widest">ENCRYPTING & UPLOADING</span>
-                        <span id="pct">0%</span>
-                    </div>
-                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div id="bar" class="h-full bg-orange-600" style="width: 0%"></div>
-                    </div>
+                <div id="prog-box" class="hidden mt-10">
+                    <div class="flex justify-between text-[10px] font-black mb-3"><span>TRANSFERRING...</span><span id="pct">0%</span></div>
+                    <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div id="bar" class="h-full bg-orange-600" style="width: 0%"></div></div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div id="list-view" class="page-content hidden">
+        <section id="list-sec" class="page-content hidden">
             <div class="grid gap-6 max-w-4xl">
-                {% for folder, files in folders.items() %}
-                <div class="flex items-center justify-between p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] hover:bg-white/[0.05] transition group">
-                    <div class="flex items-center gap-6">
-                        <div class="p-4 bg-orange-500/10 rounded-2xl text-orange-500 group-hover:scale-110 transition">
-                            <i data-lucide="folder-archive"></i>
+                {% if folders %}
+                    {% for folder, files in folders.items() %}
+                    <div class="flex items-center justify-between p-10 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition">
+                        <div class="flex items-center gap-8">
+                            <div class="w-16 h-16 bg-orange-600/10 rounded-3xl flex items-center justify-center text-orange-600">
+                                <i data-lucide="folder-open" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-black italic uppercase tracking-tight">{{ folder }}</h3>
+                                <p class="text-[10px] text-white/20 font-bold uppercase tracking-widest mt-1">{{ files|length }} Encrypted Packets</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="font-black text-xl italic uppercase">{{ folder }}</h3>
-                            <p class="text-[10px] text-white/20 font-bold uppercase tracking-widest">{{ files|length }} Neural Packets</p>
+                        <div class="flex gap-4">
+                            <a href="/download_folder/{{ folder }}" class="p-5 bg-white text-black rounded-2xl hover:bg-orange-600 hover:text-white transition">
+                                <i data-lucide="download"></i>
+                            </a>
+                            <a href="/delete_folder/{{ folder }}" class="p-5 bg-red-600/10 text-red-500 rounded-2xl border border-red-500/20 hover:bg-red-500 hover:text-white transition">
+                                <i data-lucide="trash-2"></i>
+                            </a>
                         </div>
                     </div>
-                    <div class="flex gap-4">
-                        <a href="/download_folder/{{ folder }}" class="p-4 bg-white text-black rounded-2xl hover:bg-orange-500 hover:text-white transition">
-                            <i data-lucide="download"></i>
-                        </a>
-                        <a href="/delete_folder/{{ folder }}" class="p-4 bg-red-600/10 text-red-500 rounded-2xl border border-red-500/20 hover:bg-red-500 hover:text-white transition">
-                            <i data-lucide="trash-2"></i>
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-white/10 italic text-xl">Neural Archives Empty.</p>
+                {% endif %}
             </div>
-        </div>
+        </section>
     </main>
 
     <script>
@@ -164,9 +164,9 @@
             document.body.setAttribute('data-theme', t); 
         }
 
-        function showPage(pageId, btn) {
+        function showPage(id, btn) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-            document.getElementById(pageId).classList.remove('hidden');
+            document.getElementById(id).classList.remove('hidden');
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             btn.classList.add('active');
         }
@@ -176,19 +176,15 @@
             e.preventDefault();
             const files = document.getElementById('file-input').files;
             if(!files.length) return;
-
             const formData = new FormData();
             for (const file of files) formData.append('file', file, file.webkitRelativePath);
-
             const xhr = new XMLHttpRequest();
             document.getElementById('prog-box').classList.remove('hidden');
-
             xhr.upload.onprogress = (ev) => {
                 const p = Math.round((ev.loaded / ev.total) * 100);
                 document.getElementById('bar').style.width = p + '%';
                 document.getElementById('pct').innerText = p + '%';
             };
-
             xhr.onload = () => window.location.reload();
             xhr.open('POST', '/upload', true);
             xhr.send(formData);
