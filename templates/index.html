@@ -3,131 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRC | Eternal Data</title>
+    <title>BRC | Unified Storage</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
         :root { --accent: #ff5500; --bg: #080808; }
-        
         body { background-color: var(--bg); color: white; margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
 
-        /* FIXED SIDEBAR FIX */
         aside {
             width: 80px; height: calc(100vh - 40px); margin: 20px;
             background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem;
-            display: flex; flex-direction: column; align-items: center; padding: 30px 0;
-            flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center; padding: 30px 0; flex-shrink: 0;
         }
 
-        .logo-box { 
-            width: 50px; height: 50px; border-radius: 12px; overflow: hidden; 
-            border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; 
-        }
-        .logo-box:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent); }
+        .nav-btn { padding: 15px; border-radius: 15px; color: rgba(255,255,255,0.2); transition: 0.3s; }
+        .nav-btn.active { color: var(--accent); background: rgba(255,85,0,0.1); }
 
-        /* FIRE INDICATOR FIX */
-        .fire-container { margin-top: auto; position: relative; width: 40px; height: 40px; }
         .flame {
-            position: absolute; bottom: 5px; left: 10px; width: 20px; height: 20px;
-            background: var(--accent); border-radius: 50% 0 50% 50%;
-            transform: rotate(-45deg); filter: blur(1px);
-            animation: burn 0.5s infinite alternate;
-            box-shadow: 0 0 15px var(--accent), 0 0 25px #ff0000;
+            width: 20px; height: 20px; background: var(--accent); border-radius: 50% 0 50% 50%;
+            transform: rotate(-45deg); filter: blur(1px); animation: burn 0.5s infinite alternate;
+            box-shadow: 0 0 15px var(--accent); margin-top: auto;
         }
         @keyframes burn { from { transform: rotate(-45deg) scale(1); } to { transform: rotate(-45deg) scale(1.2); } }
 
         main { flex-grow: 1; padding: 60px; overflow-y: auto; }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 2.5rem; padding: 40px; backdrop-filter: blur(10px);
-        }
-
-        .btn-primary {
-            background: var(--accent); color: black; font-weight: 900; 
-            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 85, 0, 0.3); background: white; }
+        .folder-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 2rem; padding: 25px; transition: 0.3s; }
+        .folder-card:hover { border-color: var(--accent); background: rgba(255,255,255,0.04); }
     </style>
 </head>
 <body>
 
     <aside>
-        <div class="logo-box mb-8">
-            <img src="/static/channels4_profile.png.jpg" onerror="this.src='https://ui-avatars.com/api/?name=BRC&background=ff5500&color=fff'" class="w-full h-full object-cover">
-        </div>
+        <div class="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center font-black text-black mb-10">BRC</div>
         
-        <nav class="flex flex-col gap-8 text-white/20">
-            <button onclick="showPage('up')" class="hover:text-white transition"><i data-lucide="upload-cloud"></i></button>
-            <button onclick="showPage('list')" class="hover:text-white transition"><i data-lucide="layers"></i></button>
+        <nav class="flex flex-col gap-6">
+            <button onclick="showPage('up-page', this)" class="nav-btn active"><i data-lucide="upload"></i></button>
+            <button onclick="showPage('list-page', this)" class="nav-btn"><i data-lucide="folder"></i></button>
         </nav>
 
-        <div class="fire-container">
-            <div class="flame"></div>
-        </div>
+        <div class="flame"></div>
     </aside>
 
     <main>
-        <header class="mb-16">
-            <h1 class="text-7xl font-black italic tracking-tighter">BRC<span class="text-orange-600">.</span></h1>
-            <div class="mt-4 flex items-center gap-4 text-white/30 font-bold text-[10px] uppercase tracking-widest">
-                <span>Eternal Load: {{ used_gb }} GB / 100,000 GB</span>
-                <div class="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
-                    <div class="h-full bg-orange-600" style="width: {{ percent }}%"></div>
-                </div>
-            </div>
+        <header class="mb-12">
+            <h1 class="text-6xl font-black italic">BRC<span class="text-orange-600">.</span></h1>
+            <p class="text-white/20 text-[10px] font-bold tracking-[0.3em] mt-2 uppercase">Load: {{ used_gb }} GB / 100K GB</p>
         </header>
 
-        <section id="up" class="page">
-            <div class="glass-card max-w-xl">
-                <h2 class="text-2xl font-black mb-2 uppercase">Injection Terminal</h2>
-                <p class="text-white/30 mb-10 text-sm">Upload folders to the BRC permanent sector.</p>
-                
+        <div id="up-page" class="page-content">
+            <div class="max-w-xl bg-white/[0.02] p-12 rounded-[3rem] border border-white/5">
+                <h2 class="text-xl font-bold mb-6">INJECT FOLDER</h2>
                 <form id="upload-form">
-                    <div class="border-2 border-dashed border-white/5 rounded-3xl p-10 mb-8 hover:border-orange-500/50 transition-all group">
-                        <input type="file" id="file-input" webkitdirectory directory multiple class="block w-full text-sm text-white/20">
-                    </div>
-                    <button type="submit" class="btn-primary w-full py-5 rounded-2xl">Execute Upload</button>
+                    <input type="file" id="file-input" webkitdirectory directory multiple class="block w-full text-sm text-white/30 mb-8">
+                    <button type="submit" class="w-full py-5 bg-orange-600 text-black font-black rounded-2xl uppercase hover:bg-white transition">Start Upload</button>
                 </form>
-
-                <div id="progress-box" class="hidden mt-8">
-                    <div class="flex justify-between text-[10px] font-bold mb-2">
-                        <span class="text-orange-500">SYNCING DATA...</span>
-                        <span id="pct">0%</span>
-                    </div>
-                    <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div id="bar" class="h-full bg-orange-500 transition-all duration-300" style="width: 0%"></div>
-                    </div>
+                <div id="prog-box" class="hidden mt-8">
+                    <div class="flex justify-between text-[10px] mb-2 font-bold"><span class="text-orange-500">UPLOADING...</span><span id="pct">0%</span></div>
+                    <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div id="bar" class="h-full bg-orange-500" style="width: 0%"></div></div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section id="list" class="hidden">
-            <div class="grid gap-4 max-w-4xl">
-                {% if items %}
-                    {% for item in items %}
-                    <div class="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:bg-white/[0.05] transition-all">
-                        <div class="flex items-center gap-4">
-                            <i data-lucide="file" class="text-orange-500 w-5 h-5"></i>
-                            <span class="font-bold text-sm tracking-tight">{{ item.pathname }}</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <a href="{{ item.url }}" download class="p-3 bg-white text-black rounded-xl hover:scale-105 transition"><i data-lucide="download" class="w-4 h-4"></i></a>
-                            <a href="/delete/{{ item.url }}" class="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+        <div id="list-page" class="page-content hidden">
+            <div class="grid gap-6 max-w-4xl">
+                {% for folder_name, contents in folders.items() %}
+                <div class="folder-card flex items-center justify-between">
+                    <div class="flex items-center gap-5">
+                        <div class="p-4 bg-orange-500/10 rounded-2xl text-orange-500"><i data-lucide="folder-closed"></i></div>
+                        <div>
+                            <h3 class="font-bold text-lg">{{ folder_name }}</h3>
+                            <p class="text-xs text-white/20">{{ contents|length }} Files Inside</p>
                         </div>
                     </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-white/10 italic">Sector is empty...</p>
-                {% endif %}
+                    <div class="flex gap-3">
+                        <button onclick="alert('Open folder to see files (Feature coming soon)')" class="p-3 bg-white/5 rounded-xl hover:bg-white/10"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                        <a href="/delete_folder/{{ folder_name }}" class="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        </section>
+        </div>
     </main>
 
     <script>
         lucide.createIcons();
+
+        function showPage(pageId, btn) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
 
         const form = document.getElementById('upload-form');
         form.onsubmit = async (e) => {
@@ -139,7 +107,7 @@
             for (const file of files) formData.append('file', file, file.webkitRelativePath);
 
             const xhr = new XMLHttpRequest();
-            document.getElementById('progress-box').classList.remove('hidden');
+            document.getElementById('prog-box').classList.remove('hidden');
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
@@ -153,12 +121,6 @@
             xhr.open('POST', '/upload', true);
             xhr.send(formData);
         };
-
-        function showPage(id) {
-            document.getElementById('up').classList.add('hidden');
-            document.getElementById('list').classList.add('hidden');
-            document.getElementById(id).classList.remove('hidden');
-        }
     </script>
 </body>
 </html>
